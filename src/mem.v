@@ -22,7 +22,7 @@ module mem(input clk,
 
     /* Simulation -- read initial content from file */
     initial begin
-        $readmemh("program.hex", ram);
+        $readmemh("program.bin", ram);
         $readmemb("tilemap.bin", tile_map);
     end
 
