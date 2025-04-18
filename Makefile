@@ -11,7 +11,7 @@ TEST_VCDS=${addsuffix .vcd,${TEST_NAMES}}
 all : cpu
 
 cpu : Makefile ${V_FILES}
-	iverilog -o cpu ${V_FILES}
+	iverilog -DSIMULATION -o ./build/cpu ${V_FILES}
 
 ${TEST_RAWS} : %.raw : Makefile cpu %.hex
 	@echo "failed to run" > $*.raw
@@ -38,5 +38,5 @@ ${TEST_TESTS} : %.test : Makefile %.result
 test : ${TEST_TESTS};
 
 clean:
-	-rm -rf cpu *.out *.diff *.raw *.out *.result *.time *.cycles
+	-rm -rf ./build/cpu *.out *.diff *.raw *.out *.result *.time *.cycles
 	-rm -rf cpu tests/*.out tests/*.diff tests/*.raw tests/*.out tests/*.result tests/*.time tests/*.cycles

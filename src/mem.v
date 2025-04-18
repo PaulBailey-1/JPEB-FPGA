@@ -3,7 +3,9 @@
 module mem(input clk,
     input [15:0]raddr0, output [15:0]rdata0,
     input ren, input [15:0]raddr1, output reg [15:0]rdata1,
-    input wen, input [15:0]waddr, input [15:0]wdata);
+    input wen, input [15:0]waddr, input [15:0]wdata,
+    input ps2_clk, input ps2_data
+);
 
     localparam TILEMAP_START = 16'hc000;
     localparam FRAMEBUFFER_START = 16'he000;
@@ -14,16 +16,19 @@ module mem(input clk,
     reg [15:0]tile_map[0:16'h2000]; // 128Kb (0xC000-0xDFFF)
     reg [15:0]frame_buffer[0:16'h1000]; // 64Kb (0xE000-0xEFFF)
 
-    wire ps2_clk;
-    wire ps2_data;
     wire ps2_ren = raddr1 == PS2_REG & ren;
     wire [15:0]ps2_data_out;
-    ps2 ps2(ps2_clk, ps2_data, clk, ps2_ren, ps2_data_out);
+    ps2 ps2(ps2_clk, ps2_data, clk, ps2_ren);
 
-    /* Simulation -- read initial content from file */
+    integer file, bytes_read;
     initial begin
-        $readmemh("program.bin", ram);
-        $readmemb("tilemap.bin", tile_map);
+        $readmemh("../data/program.hex", ram);
+        file = $fopen("../data/tilemap.bin", "rb");
+        bytes_read = $fread(tile_map, file);
+        if (bytes_read != 16384) begin
+            $display("Error: %d bytes read from tilemap.bin, expected 8192", bytes_read);
+        end
+        $fclose(file);
     end
 
     assign rdata0 = raddr0 < TILEMAP_START ? ram[raddr0] :
