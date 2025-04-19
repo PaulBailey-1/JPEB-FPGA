@@ -4,7 +4,8 @@ module mem(input clk,
     input [15:0]raddr0, output [15:0]rdata0,
     input ren, input [15:0]raddr1, output reg [15:0]rdata1,
     input wen, input [15:0]waddr, input [15:0]wdata,
-    input ps2_clk, input ps2_data
+    output ps2_ren, input [15:0]ps2_data_in,
+    input [9:0]pixel_x, input [9:0]pixel_y, output [11:0]pixel
 );
 
     localparam TILEMAP_START = 16'hc000;
@@ -16,26 +17,30 @@ module mem(input clk,
     reg [15:0]tile_map[0:16'h2000]; // 128Kb (0xC000-0xDFFF)
     reg [15:0]frame_buffer[0:16'h1000]; // 64Kb (0xE000-0xEFFF)
 
-    wire ps2_ren = raddr1 == PS2_REG & ren;
-    wire [15:0]ps2_data_out;
-    ps2 ps2(ps2_clk, ps2_data, clk, ps2_ren);
-
     integer file, bytes_read;
     initial begin
         $readmemh("../data/program.hex", ram);
-        file = $fopen("../data/tilemap.bin", "rb");
-        bytes_read = $fread(tile_map, file);
-        if (bytes_read != 16384) begin
-            $display("Error: %d bytes read from tilemap.bin, expected 8192", bytes_read);
-        end
-        $fclose(file);
+        $readmemh("../data/tilemap.hex", tile_map);
     end
 
+    assign ps2_ren = raddr1 == PS2_REG & ren;
     assign rdata0 = raddr0 < TILEMAP_START ? ram[raddr0] :
                     raddr0 < FRAMEBUFFER_START ? tile_map[raddr0 - TILEMAP_START] :
                     raddr0 < IO_START ? tile_map[raddr0 - FRAMEBUFFER_START] : 0;
+    
+    // Display pixel retrevial
+    wire [15:0] display_frame_addr = ({{6{1'b0}}, pixel_x} >> 3) + ({{6{1'b0}}, pixel_y} << 4); // x / 8 + y /8 * 128
+    wire [15:0] display_tile_addr_pair = frame_buffer[(display_frame_addr >> 1)];
+    wire [7:0] display_tile = ~display_frame_addr[0] ? display_tile_addr_pair[7:0] : display_tile_addr_pair[15:8];
+    wire [15:0] pixel_idx = (display_tile << 6) + ((pixel_y & 10'h007) << 3) + (pixel_x & 10'h007); // tile_idx * 64 + py % 8 * 8 + px % 8
+    assign pixel = tile_map[pixel_idx][11:0];
 
     always @(posedge clk) begin
+
+        frame_buffer[0] <= 16'h0001;
+        frame_buffer[1] <= 16'h0302;
+        frame_buffer[2] <= 16'h0302;
+        frame_buffer[3] <= 16'h0302;
 
         if (ren) begin
             if (raddr1 < TILEMAP_START) begin
@@ -45,7 +50,7 @@ module mem(input clk,
             end else if (raddr1 < IO_START) begin
                 rdata1 <= frame_buffer[raddr1 - FRAMEBUFFER_START];
             end else if (raddr1 == PS2_REG) begin
-                rdata1 <= ps2_data_out;
+                rdata1 <= ps2_data_in;
             end
         end
         if (wen) begin
