@@ -1,15 +1,15 @@
 `timescale 1ps/1ps
 
-module cpu(
-    input clk
-    );
+module main();
+
+    // clock 
+    wire clk;
+    clock c0(clk);
 
     reg halt = 0;
     wire [15:0]ret_val;
 
-    `ifdef SIMULATION
-      counter ctr(halt, clk, ret_val);
-    `endif
+    counter ctr(halt, clk, ret_val);
 
     // PC
     reg [15:0]pc = 16'h0000;
@@ -43,11 +43,33 @@ module cpu(
     wire [15:0]left_shift_6;
     assign left_shift_6 = {imm10, 6'b0};
 
-    wire taken; // TODO: define this
+    wire [5:0]branch_code;
+    assign branch_code = instr[12:7];
+
+    wire taken;
+    wire [3:0]flags; // flags: O | S | Z | C
+    assign taken = (branch_code == 6'b000000) ? flags[1] : // bz beq
+                    (branch_code == 6'b000001) ? !flags[1] && !flags[2] : // bp
+                    (branch_code == 6'b000010) ? flags[2] : // bn
+                    (branch_code == 6'b000011) ? flags[0] : // bc
+                    (branch_code == 6'b000100) ? flags[3] : // bo
+                    (branch_code == 6'b000101) ? !flags[1] : // bne
+                    (branch_code == 6'b000110) ? 1 : // jmp
+                    (branch_code == 6'b000111) ? !flags[0] : // bnc
+                    (branch_code == 6'b001000) ? !flags[1] && flags[0] : // bg
+                    (branch_code == 6'b001001) ? flags[2] == flags[3] : // bae
+                    (branch_code == 6'b001010) ? flags[2] != flags[3] && !flags[1] : // bl
+                    (branch_code == 6'b001011) ? flags[2] != flags[3] || flags[1] : // ble
+                    (branch_code == 6'b001100) ? !flags[1] && flags[0] : // ba
+                    (branch_code == 6'b001101) ? flags[0] || flags[1] : // bae
+                    (branch_code == 6'b001110) ? !flags[0] && !flags[1] : // bb
+                    (branch_code == 6'b001111) ? !flags[0] || flags[1] : // bbe
+                    (branch_code == 6'b010000) ? !flags[3] : // bno
+                    0;
 
     wire mux_rf = (op == 3'b100);
-    wire mux_lhs = (op == 3'b001) || (op == 3'b100) || (op == 3'b101) || (op == 3'b101);
-    wire mux_rhs = (op == 3'b011);
+    wire mux_lhs = (op == 3'b011);
+    wire mux_rhs = (op == 3'b001) || (op == 3'b100) || (op == 3'b101) || (op == 3'b101);
     wire [1:0]mux_tgt = (op == 3'b101) ? 2'b01 :
                         (op == 3'b111) ? 2'b00 :
                         2'b10;
@@ -76,10 +98,9 @@ module cpu(
 
     wire [15:0]lhs;
     wire [15:0]rhs;
-    wire [3:0]flags;
 
-    assign lhs = mux_lhs ? sign_ext_7 : d_1;
-    assign rhs = mux_rhs ? left_shift_6 : d_2;
+    assign lhs = mux_lhs ? left_shift_6 : d_1;
+    assign rhs = mux_rhs ? sign_ext_7 : d_2;
 
     ALU ALU(clk, op, alu_op, lhs, rhs, rslt, flags);
 
@@ -94,6 +115,7 @@ module cpu(
             (mux_pc == 2'b01) ? pc + sign_ext_7 + 1 :
             (mux_pc == 2'b10) ? rslt :
             0;
+      halt <= (op == 3'b111 && imm7 != 7'b0);
     end
 
 endmodule

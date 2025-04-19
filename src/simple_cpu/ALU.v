@@ -33,12 +33,12 @@ module ALU(input clk,
       (alu_op == 4'b1110) ? ({flags[0], s_2[15:1]}) : // shrc
       (alu_op == 4'b1111) ? ({s_2[14:0], flags[0]}) : // shlc
       0) :
-    (op == 3'b001) ? (s_1 + s_2) : 
-    (op == 3'b011) ? (s_1 + s_2) : // TODO: fix these
-    (op == 3'b100) ? (s_1 + s_2) : // TODO: fix these
-    (op == 3'b101) ? (s_1 + s_2) : // TODO: fix these
-    (op == 3'b110) ? (s_1 + s_2) : // TODO: fix these
-    (op == 3'b111) ? (s_1 + s_2) : // TODO: fix these
+    (op == 3'b001) ? (s_1 + s_2) : // addi
+    (op == 3'b011) ? s_1 : // lui
+    (op == 3'b100) ? (s_1 + s_2) : // sw
+    (op == 3'b101) ? (s_1 + s_2) : // lw
+    (op == 3'b110) ? 0 : // branch
+    (op == 3'b111) ? s_1: // jalr
     0;
 
   wire c;
