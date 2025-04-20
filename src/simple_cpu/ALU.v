@@ -61,11 +61,6 @@ module ALU(input clk,
       (alu_op == 4'b1111) ? s_2[15] : // shlc
       0) :
     (op == 3'b001) ? sum[16] : 
-    (op == 3'b011) ? 0 : // TODO: fix these
-    (op == 3'b100) ? 0 : // TODO: fix these
-    (op == 3'b101) ? 0 : // TODO: fix these
-    (op == 3'b110) ? 0 : // TODO: fix these
-    (op == 3'b111) ? 0 : // TODO: fix these
     0;
 
   wire z;
