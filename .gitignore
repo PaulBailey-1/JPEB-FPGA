@@ -3,5 +3,5 @@ cpu.vcd
 Assembler.py
 *.bin
 *.out
-data/program.hex
 *.vcd
+data/program.hex
