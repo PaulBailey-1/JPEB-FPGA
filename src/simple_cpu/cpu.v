@@ -2,6 +2,11 @@
 
 module main();
 
+    initial begin
+      $dumpfile("cpu.vcd");
+      $dumpvars(0,main);
+    end
+
     // clock 
     wire clk;
     clock c0(clk);

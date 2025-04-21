@@ -11,7 +11,7 @@ cpu : Makefile ${V_FILES}
 	iverilog -DSIMULATION -o ./build/cpu ${V_FILES}
 
 test: $(SIM_OUTS)
-	rm tests/asm/*.bin
+	rm -f tests/asm/*.bin
 
 # Compile assembly to binary
 tests/asm/%.out: tests/asm/%.s
@@ -20,9 +20,10 @@ tests/asm/%.out: tests/asm/%.s
 	rm -f $@.tmp
 
 # Run simulation
-tests/asm/%.sim.out: tests/asm/%.out
+tests/asm/%.sim.out: tests/asm/%.out $(V_SRCS)
 	iverilog -o cpu $(V_SRCS)
 	./cpu $< > $@
+	mv cpu.vcd $@.vcd
 
 make clean:
 	rm -f tests/asm/*.sim.out tests/asm/*.bin
