@@ -4,3 +4,4 @@ Assembler.py
 *.bin
 *.out
 *.vcd
+data/program.hex

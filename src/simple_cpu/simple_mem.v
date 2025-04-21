@@ -6,10 +6,23 @@ module simple_mem(input clk,
   // simpler memory for simulation/debugging cpu
   reg [15:0]ram[0:16'h7fff];
 
-  /* Simulation -- read initial content from file */
+`ifdef SIMULATION
+    reg [255:0] filepath;
+    initial begin
+        if (!$value$plusargs("DATAPATH=%s", filepath)) begin
+            $display("No datapath provided.");
+        end
+    end
+    initial begin
+        $readmemh({filepath, "/program.hex"},ram);
+    end
+`else
   initial begin
-      $readmemh("mem.hex",ram);
+      $readmemh("../../data/program.hex",ram);
   end
+`endif
+
+
 
   assign rdata0 = ram[raddr0];
   assign rdata1 = ram[raddr1];
