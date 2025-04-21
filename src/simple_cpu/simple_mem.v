@@ -8,7 +8,7 @@ module simple_mem(input clk,
 
   /* Simulation -- read initial content from file */
   initial begin
-      $readmemh("add_test.hex",ram);
+      $readmemh("mem.hex",ram);
   end
 
   assign rdata0 = ram[raddr0];

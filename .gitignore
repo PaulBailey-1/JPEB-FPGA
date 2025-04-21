@@ -2,3 +2,4 @@ cpu
 cpu.vcd
 Assembler.py
 *.bin
+*.out
