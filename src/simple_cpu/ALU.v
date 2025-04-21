@@ -11,9 +11,9 @@ module ALU(input clk,
   assign carry_sum = {1'b0, s_1} + {1'b0, s_2} + flags[0];
 
   wire [16:0]diff;
-  assign diff = {1'b0, s_1} - {1'b0, s_2};
+  assign diff = {1'b0, s_2} - {1'b0, s_1};
   wire [16:0]carry_diff;
-  assign carry_diff = {1'b0, s_1} - {1'b0, s_2} - ~flags[0];
+  assign carry_diff = {1'b0, s_2} - {1'b0, s_1} - ~flags[0];
 
   assign result = (op == 3'b000) ? 
       ((alu_op == 4'b0000) ? (~(s_1 & s_2)) : // nand
@@ -63,8 +63,8 @@ module ALU(input clk,
     (op == 3'b001) ? sum[16] : 
     0;
 
-  wire z;
-  assign z = (result == 0);
+  wire zero;
+  assign zero = (result == 0);
 
   wire s;
   assign s = result[15];
@@ -73,7 +73,7 @@ module ALU(input clk,
   assign o = (result[15] != s_1[15]) & (s_1[15] == s_2[15]);
 
   always @(posedge clk) begin
-    flags <= {o, s, z, c};
+    flags <= {o, s, zero, c};
   end
 
 endmodule

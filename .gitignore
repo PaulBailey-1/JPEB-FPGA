@@ -3,3 +3,4 @@ cpu.vcd
 Assembler.py
 *.bin
 *.out
+*.vcd
