@@ -11,18 +11,18 @@ module ALU(input clk,
   assign carry_sum = {1'b0, s_1} + {1'b0, s_2} + flags[0];
 
   wire [16:0]diff;
-  assign diff = {1'b0, s_2} - {1'b0, s_1};
+  assign diff = {1'b0, s_2} + {1'b0, 16'b1 + (~s_1)};
   wire [16:0]carry_diff;
-  assign carry_diff = {1'b0, s_2} - {1'b0, s_1} - ~flags[0];
+  assign carry_diff = {1'b0, s_2} + {1'b0, 16'b1 + (~s_1)} - ~flags[0];
 
   assign result = (op == 3'b000) ? 
       ((alu_op == 4'b0000) ? (~(s_1 & s_2)) : // nand
-      (alu_op == 4'b0001) ? (s_1 + s_2) : // add
-      (alu_op == 4'b0010) ? (s_1 + s_2 + flags[0]) : // addc
+      (alu_op == 4'b0001) ? sum[15:0] : // add
+      (alu_op == 4'b0010) ? carry_sum[15:0] : // addc
       (alu_op == 4'b0011) ? (s_1 | s_2) : // or
-      (alu_op == 4'b0100) ? (s_1 - s_2 - ~flags[0]) : // subc
+      (alu_op == 4'b0100) ? carry_diff[15:0] : // subc
       (alu_op == 4'b0101) ? (s_1 & s_2) : // and
-      (alu_op == 4'b0110) ? (s_1 - s_2) : // sub
+      (alu_op == 4'b0110) ? diff[15:0]  : // sub
       (alu_op == 4'b0111) ? (s_1 ^ s_2) : // xor
       (alu_op == 4'b1000) ? (~s_2) : // not
       (alu_op == 4'b1001) ? ({s_2[14:0], 1'b0}) : // shl
