@@ -32,10 +32,10 @@ module main();
 
     wire branch;
     wire flush;
-    wire wb_halt;
-    assign flush = branch || wb_halt;
+    wire mem_halt;
+    assign flush = branch || mem_halt;
 
-    mem mem(clk, 
+    simple_mem mem(clk, 
       fetch_addr, mem_out_1, 
       addr, mem_out_2,
       mem_we, exec_result_out, store_data);
@@ -62,7 +62,7 @@ module main();
     
     wire decode_bubble_out;
     wire decode_halt_out;
-    wire [3:0]reg_tgt;
+    wire [2:0]reg_tgt;
 
     decode decode(clk, flush,
       mem_out_1, fetch_bubble_out, fetch_pc_out,
@@ -72,34 +72,38 @@ module main();
       decode_alu_op_out, decode_imm_out, decode_branch_code_out,
       decode_bubble_out, stall, decode_halt_out, ret_val);
 
-    wire [15:0]exec_instr_out;
     wire exec_bubble_out;
-
-    wire [15:0]mem_instr_out;
-    wire [15:0]mem_result_out;
-    wire mem_bubble_out;
-    wire wb_halt;
-    wire wb_tgt;
+    wire [2:0]wb_tgt;
     wire [15:0]wb_result_out;
-    wire mem_tgt;
+    wire [2:0]exec_opcode_out;
+    wire [2:0]exec_tgt_out;
+    wire exec_halt_out;
     
-    execute execute(clk, decode_bubble_out, wb_halt, 
+    execute execute(clk, decode_bubble_out, mem_halt, 
       decode_opcode_out, decode_s_1_out, decode_s_2_out, decode_tgt_out,
       decode_alu_op_out, decode_imm_out, decode_branch_code_out,
       wb_tgt, decode_op1_out, decode_op2_out, wb_result_out, decode_pc_out,
       decode_halt_out, 
 
-      exec_result_out, addr, store_data, exec_instr_out, exec_bubble_out, 
-      branch, branch_tgt, is_branch_instr, taken);
+      exec_result_out, addr, store_data, exec_opcode_out, exec_tgt_out, exec_bubble_out, 
+      branch, branch_tgt, exec_halt_out);
 
-    memory memory(clk, exec_bubble_out, wb_halt, exec_instr_out, exec_result_out,
-      mem_instr_out, mem_result_out, mem_we, mem_bubble_out, mem_halt);
+    wire [2:0]mem_tgt_out;
+    wire [15:0]mem_result_out;
+    wire [2:0]mem_opcode_out;
+    wire mem_bubble_out;
 
-    writeback writeback(clk, mem_bubble_out, mem_instr_out, mem_result_out, mem_out_2,
-      reg_write_data, reg_we, wb_halt);
+    memory memory(clk, 
+      exec_bubble_out, exec_opcode_out, exec_tgt_out, exec_result_out, exec_halt_out,
+      mem_tgt_out, mem_opcode_out, mem_result_out, mem_we, mem_bubble_out, mem_halt);
+
+    
+
+    writeback writeback(clk, mem_bubble_out, mem_tgt_out, mem_opcode_out, mem_result_out, mem_out_2,
+      reg_write_data, reg_we);
 
     always @(posedge clk) begin
-      halt <= wb_halt;
+      halt <= mem_halt;
     end
 
 endmodule

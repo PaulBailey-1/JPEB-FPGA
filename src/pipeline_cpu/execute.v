@@ -3,7 +3,7 @@ module execute(input clk,
     input bubble_in, input halt_in_wb,
     input [2:0]opcode, input [2:0]s_1, input [2:0]s_2, input [2:0]tgt, input [3:0]alu_op,
     input [15:0]imm, input [5:0]branch_code,
-    input [2:0]mem_tgt, input [2:0]wb_tgt,
+    input [2:0]wb_tgt,
     input [15:0]reg_out_1, input [15:0]reg_out_2,
     input [15:0]wb_result_out, input [15:0]decode_pc_out, input halt_in,
     output reg [15:0]result, output [15:0]addr, output reg [15:0]store_data, output reg [2:0]opcode_out,
@@ -20,11 +20,11 @@ module execute(input clk,
   wire [15:0]op2;
 
   assign op1 = 
-    (mem_tgt == s_1 && s_1 != 3'b000) ? result :
+    (tgt_out == s_1 && s_1 != 3'b000) ? result :
     (wb_tgt == s_1 && s_1 != 3'b000) ? wb_result_out :
     reg_out_1;
   assign op2 = 
-    (mem_tgt == s_2 && s_2 != 3'b000) ? result :
+    (tgt_out == s_2 && s_2 != 3'b000) ? result :
     (wb_tgt == s_2 && s_2 != 3'b000) ? wb_result_out :
     reg_out_2;
 
@@ -40,7 +40,7 @@ module execute(input clk,
   always @(posedge clk) begin
     result <= addr;
     store_data <= op2;
-    tgt_out <= tgt;
+    tgt_out <= halt_in_wb ? 3'b000 : tgt;
     opcode_out <= opcode;
     bubble_out <= halt_in_wb ? 1 : bubble_in;
     halt_out <= halt_in;

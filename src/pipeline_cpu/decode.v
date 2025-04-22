@@ -32,7 +32,7 @@ module decode(input clk,
       tgt_out == s_2) &&
       tgt_out != 3'b000 &&
       opcode_out == 3'b101 && // lw can cause stalls
-      !bubble_in && !bubble_out);
+      !bubble_in);
 
   regfile regfile(clk,
         s_1, d_1,
