@@ -1,7 +1,7 @@
 `timescale 1ps/1ps
 
 module cpu(
-  input clk,
+  input clk, output mem_read_en,
   output [15:0]mem_read0_addr, input [15:0]mem_read0_data,
   output [15:0]mem_read1_addr, input [15:0]mem_read1_data,
   output mem_write_en, output [15:0]mem_write_addr, output [15:0]mem_write_data,
@@ -10,10 +10,15 @@ module cpu(
 
     reg halt = 0;
 
+`ifdef SIMULATION
     counter ctr(halt, clk, ret_val);
+`endif
 
     // PC
     reg [15:0]pc = 16'h0000;
+    reg [15:0]fetch_pc = 16'h0000;
+
+    reg fetch_valid = 0;
 
     wire [15:0]instr;
 
@@ -93,6 +98,8 @@ module cpu(
     wire [15:0]rslt;
     wire [15:0]mem_out;
 
+    reg _mem_read_en = 1;
+    assign mem_read_en = _mem_read_en;
     assign mem_read0_addr = pc;
     assign instr = mem_read0_data;
     assign mem_read1_addr = rslt;
@@ -111,18 +118,26 @@ module cpu(
 
     ALU ALU(clk, op, alu_op, lhs, rhs, rslt, flags);
 
-    assign tgt = (mux_tgt == 2'b00) ? pc + 1 :
+    assign tgt = (mux_tgt == 2'b00) ? fetch_pc + 1 :
                  (mux_tgt == 2'b01) ? mem_out :
                  (mux_tgt == 2'b10) ? rslt : 
                  0;
 
+    reg fetch_setup = 0;
+    wire jumping = fetch_valid & ((mux_pc == 2'b01) || (mux_pc == 2'b10));
 
     always @(posedge clk) begin
-      pc <= (mux_pc == 2'b00) ? pc + 1 : 
-            (mux_pc == 2'b01) ? pc + sign_ext_7 + 1 :
-            (mux_pc == 2'b10) ? rslt :
-            0;
-      halt <= (op == 3'b111 && imm7 != 7'b0);
+      if (~halt) begin
+        pc <= (mux_pc == 2'b00) || !fetch_valid ? pc + 1 : 
+              (mux_pc == 2'b01) ? fetch_pc + sign_ext_7 + 1 :
+              (mux_pc == 2'b10) ? rslt :
+              0;
+      end
+      fetch_pc <= pc;
+      fetch_setup <= 1;
+      fetch_valid <= fetch_setup & ~jumping;
+      halt <= ~halt ? 
+            (fetch_valid ? (op == 3'b111 && imm7 != 7'b0) : 0) : 1;
     end
 
 endmodule
