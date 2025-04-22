@@ -12,12 +12,8 @@ module decode(input clk,
     output reg bubble_out, output stall, output reg halt_out, output [15:0]ret_val
   );
 
-  reg was_stall;
-  reg was_was_stall;
-
   wire [15:0]instr_in;
-  reg [15:0]instr_buf;
-  assign instr_in = (was_stall || was_was_stall) ? instr_buf : mem_out_1;
+  assign instr_in = mem_out_1;
 
   wire [2:0]opcode = instr_in[15:13];
 
@@ -36,7 +32,7 @@ module decode(input clk,
       tgt_out == s_2) &&
       tgt_out != 3'b000 &&
       opcode_out == 3'b101 && // lw can cause stalls
-      !bubble_in && !bubble_out);
+      !bubble_in);
 
   regfile regfile(clk,
         s_1, d_1,
@@ -69,18 +65,13 @@ module decode(input clk,
     opcode_out <= opcode;
     s_1_out <= s_1;
     s_2_out <= s_2;
-    tgt_out <= (flush || bubble_in || stall || (opcode == 3'b100 || opcode == 3'b110)) ? 3'b000 : r_a;
+    tgt_out <= (flush || bubble_in || (opcode == 3'b100 || opcode == 3'b110)) ? 3'b000 : r_a;
     imm_out <= imm;
     branch_code_out <= branch_code;
     alu_op_out <= alu_op;
     bubble_out <= (flush || stall) ? 1 : bubble_in;
     pc_out <= pc_in;
     halt_out <= (opcode == 3'b111) && (imm7 != 0) && !bubble_in;
-
-    instr_buf <= mem_out_1;
-
-    was_stall <= stall;
-    was_was_stall <= was_stall;
   end
 
 endmodule
