@@ -6,7 +6,7 @@ module execute(input clk,
     input [2:0] mem_tgt, input [2:0]wb_tgt,
     input [15:0]reg_out_1, input [15:0]reg_out_2,
     input [15:0]mem_result_out, input [15:0]wb_result_out, input [15:0]decode_pc_out, input halt_in,
-    output reg [15:0]result, output [15:0]addr, output reg [15:0]store_data, output reg [2:0]opcode_out,
+    output reg [15:0]result, output [15:0]addr, output [15:0]store_data, output we, output reg [2:0]opcode_out,
     output reg [2:0]tgt_out,
     output reg bubble_out,
     output branch, output [15:0]branch_tgt, output reg halt_out
@@ -42,10 +42,11 @@ module execute(input clk,
   ALU ALU(clk, opcode, alu_op, lhs, rhs, bubble_in, alu_rslt, flags);
 
   assign addr = (opcode == 3'b111) ? decode_pc_out + 1 : alu_rslt;
+  assign store_data = op2;
+  assign we = (opcode == 3'b100) && !bubble_in && !halt_out && !halt_in_wb;
 
   always @(posedge clk) begin
     result <= addr;
-    store_data <= op2;
     tgt_out <= halt_in_wb ? 3'b000 : tgt;
     opcode_out <= opcode;
     bubble_out <= halt_in_wb ? 1 : bubble_in;

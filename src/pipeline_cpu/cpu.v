@@ -38,8 +38,9 @@ module pipelined_cpu(
     assign mem_read0_addr = fetch_addr;
     assign mem_read1_addr = addr;
     assign mem_out_1 = mem_read0_data;
+    assign mem_out_2 = mem_read1_data;
     assign mem_write_en = mem_we;
-    assign mem_write_addr = exec_result_out;
+    assign mem_write_addr = addr;
     assign mem_write_data = store_data;
 
     wire stall;
@@ -94,7 +95,7 @@ module pipelined_cpu(
       mem_tgt_out, wb_tgt_out, decode_op1_out, decode_op2_out, mem_result_out, wb_result_out, decode_pc_out,
       decode_halt_out, 
 
-      exec_result_out, addr, store_data, exec_opcode_out, exec_tgt_out, exec_bubble_out, 
+      exec_result_out, addr, store_data, mem_we, exec_opcode_out, exec_tgt_out, exec_bubble_out, 
       branch, branch_tgt, exec_halt_out);
 
     wire [2:0]mem_opcode_out;
@@ -102,7 +103,7 @@ module pipelined_cpu(
 
     memory memory(clk, 
       exec_bubble_out, exec_opcode_out, exec_tgt_out, exec_result_out, exec_halt_out,
-      mem_tgt_out, mem_opcode_out, mem_result_out, mem_we, mem_bubble_out, mem_halt);
+      mem_tgt_out, mem_opcode_out, mem_result_out, mem_bubble_out, mem_halt);
 
     writeback writeback(clk, mem_bubble_out, mem_tgt_out, mem_opcode_out, mem_result_out, mem_out_2,
       reg_write_data, reg_we, wb_tgt_out, wb_result_out);
