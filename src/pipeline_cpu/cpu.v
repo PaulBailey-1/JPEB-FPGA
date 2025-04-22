@@ -33,7 +33,10 @@ module pipelined_cpu(
     wire mem_halt;
     assign flush = branch || mem_halt;
 
+    reg mem_ren = 1;
+    assign mem_read_en = mem_ren;
     assign mem_read0_addr = fetch_addr;
+    assign mem_read1_addr = addr;
     assign mem_out_1 = mem_read0_data;
     assign mem_write_en = mem_we;
     assign mem_write_addr = exec_result_out;

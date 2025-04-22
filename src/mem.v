@@ -37,6 +37,9 @@ module mem(input clk,
   end
 `endif
 
+    reg [15:0]raddr0_buf;
+    reg [15:0]raddr1_buf;
+
     reg [15:0]ram_data0_out;
     reg [15:0]ram_data1_out;
     reg [15:0]tilemap_data0_out;
@@ -44,11 +47,11 @@ module mem(input clk,
     reg [15:0]framebuffer_data0_out;
     reg [15:0]framebuffer_data1_out;
 
-    wire [15:0]data0_out =  raddr0 < TILEMAP_START ? ram_data0_out :
-                            raddr0 < FRAMEBUFFER_START ? framebuffer_data0_out :
+    wire [15:0]data0_out =  raddr0_buf < TILEMAP_START ? ram_data0_out :
+                            raddr0_buf < FRAMEBUFFER_START ? framebuffer_data0_out :
                             ps2_data_in;
-    wire [15:0]data1_out =  raddr1 < TILEMAP_START ? ram_data1_out :
-                            raddr1 < FRAMEBUFFER_START ? framebuffer_data1_out :
+    wire [15:0]data1_out =  raddr1_buf < TILEMAP_START ? ram_data1_out :
+                            raddr1_buf < FRAMEBUFFER_START ? framebuffer_data1_out :
                             ps2_data_in;
 
     assign ps2_ren = raddr1 == PS2_REG & ren;
@@ -67,6 +70,9 @@ module mem(input clk,
     // assign pixel = display_tilemap_out[11:0];
 
     always @(posedge clk) begin
+
+        raddr0_buf <= raddr0;
+        raddr1_buf <= raddr1;
 
         ram_data0_out <= ram[raddr0];
         ram_data1_out <= ram[raddr1];
