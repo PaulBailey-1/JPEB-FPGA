@@ -7,9 +7,22 @@ module ps2(input ps2_clk, input ps2_data, input clk, input ren, output [15:0]dat
 
     // Convert scan to ascii
     reg [7:0]lut[0:8'hff];
+`ifdef SIMULATION
+    reg [255:0] filepath;
     initial begin
-        $readmemh("../data/scan_decode.hex", lut);
+        if (!$value$plusargs("DATAPATH=%s", filepath)) begin
+            filepath = "./data/"; // Default
+        end
     end
+    initial begin
+        $readmemh({filepath, "/scan_decode.hex"}, lut); // Parameter
+    end
+`else
+  initial begin
+        $readmemh("../data/scan_decode.hex", lut); // Sythesis
+  end
+`endif
+
     wire [7:0]decode_output = lut[sr[8:1]];
 
     // Buffer 3 scan codes

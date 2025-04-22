@@ -7,11 +7,8 @@ module vga(
     input clk, input reset, 
     output h_sync_out, output v_sync_out,
     output [9:0]pixel_addr_x, output [9:0]pixel_addr_y,
-    output display_out, output sig_led
+    output display_out
 );
-
-    reg [9:0]thing_count = 0;
-    assign sig_led = thing_count[9];
 
     localparam H_ACTIVE = 640;
     localparam H_FRONTPORCH = 16;
@@ -62,7 +59,6 @@ module vga(
             if (h_counter == H_ACTIVE + H_FRONTPORCH + H_SYNC + H_BACKPORCH) begin
                 h_counter_buff <= 0;
                 if (v_counter == V_ACTIVE + V_FRONTPORCH + V_SYNC + V_BACKPORCH) begin
-                    thing_count <= thing_count + 1;
                     v_counter_buff <= 0;
                 end else
                     v_counter_buff <= v_counter + 1;

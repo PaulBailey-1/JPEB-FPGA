@@ -8,17 +8,16 @@ module jpeb(
     output [3:0]vga_red,
     output [3:0]vga_green,
     output [3:0]vga_blue,
-    output status_led, output sig_led
+    output status_led, output [7:0]leds
 `endif
     );
 
-    reg halt = 0;
     reg reset = 0;
 
 `ifdef SIMULATION
     initial begin
         $dumpfile("cpu.vcd");
-        $dumpvars(0,jpeb);
+        $dumpvars(0, jpeb);
     end
 
     // clock
@@ -30,8 +29,6 @@ module jpeb(
     wire status_led;
 
 `endif
-
-    cpu cpu(.clk(clk));
 
     // PS/2
     wire ps2_ren;
@@ -52,7 +49,7 @@ module jpeb(
         .clk(clk), .reset(reset),
         .h_sync_out(vga_h_sync), .v_sync_out(vga_v_sync),
         .pixel_addr_x(pixel_addr_x), .pixel_addr_y(pixel_addr_y),
-        .display_out(displaying), .sig_led(sig_led)
+        .display_out(displaying)
     );
 
     // Memory
@@ -74,17 +71,20 @@ module jpeb(
         .pixel_x(pixel_addr_x), .pixel_y(pixel_addr_y), .pixel(display_pixel)
     );
 
-    reg [15:0]temp = 0;
-    assign mem_read0_addr = temp;
-    assign mem_read_en = temp[0];
-    assign mem_read1_addr = temp;
-    assign mem_write_en = temp[1];
-    assign mem_write_addr = temp;
-    assign mem_write_data = temp;
+    wire [15:0]ret_val;
+    assign leds = ret_val[7:0];
 
+    cpu cpu(
+        clk,
+        mem_read0_addr, mem_read0_data,
+        mem_read1_addr, mem_read1_data,
+        mem_write_en, mem_write_addr, mem_write_data,
+        ret_val
+    );
+
+    // Blinks
     reg [24:0] led_counter = 0;
     assign status_led = led_counter[24];
-
     always @(posedge clk) begin
         led_counter <= led_counter + 1;
     end

@@ -1,7 +1,7 @@
 `timescale 1ps/1ps
 
 module mem(input clk,
-    input [15:0]raddr0, output [15:0]rdata0,
+    input [15:0]raddr0, output reg [15:0]rdata0,
     input ren, input [15:0]raddr1, output reg [15:0]rdata1,
     input wen, input [15:0]waddr, input [15:0]wdata,
     output ps2_ren, input [15:0]ps2_data_in,
@@ -13,20 +13,31 @@ module mem(input clk,
     localparam IO_START = 16'hf000;
     localparam PS2_REG = 16'hf000;
 
-    reg [15:0]ram[0:16'hbfff]; // 768Kb (0x0000-0xBFFF)
+    reg [15:0]ram[0:16'h2000]; // 768Kb (0x0000-0xBFFF)
     reg [15:0]tile_map[0:16'h2000]; // 128Kb (0xC000-0xDFFF)
     reg [15:0]frame_buffer[0:16'h1000]; // 64Kb (0xE000-0xEFFF)
 
-    integer file, bytes_read;
+`ifdef SIMULATION
+    reg [255:0] filepath;
     initial begin
-        $readmemh("../data/program.hex", ram);
-        $readmemh("../data/tilemap.hex", tile_map);
+        if (!$value$plusargs("DATAPATH=%s", filepath)) begin
+            filepath = "./data/"; // Default
+        end
     end
+    initial begin
+        // Parameter
+        $readmemh({filepath, "/program.hex"},ram);
+        $readmemh({filepath, "tilemap.hex"}, tile_map);
+    end
+`else
+  initial begin
+        // Sythesis
+        $readmemh("../data/program.hex",ram);
+        $readmemh("../data/tilemap.hex", tile_map);
+  end
+`endif
 
     assign ps2_ren = raddr1 == PS2_REG & ren;
-    assign rdata0 = raddr0 < TILEMAP_START ? ram[raddr0] :
-                    raddr0 < FRAMEBUFFER_START ? tile_map[raddr0 - TILEMAP_START] :
-                    raddr0 < IO_START ? tile_map[raddr0 - FRAMEBUFFER_START] : 0;
     
     // Display pixel retrevial
     wire [15:0] display_frame_addr = ({{6{1'b0}}, pixel_x} >> 3) + ({{6{1'b0}}, pixel_y} << 4); // x / 8 + y /8 * 128
@@ -43,6 +54,16 @@ module mem(input clk,
         frame_buffer[3] <= 16'h0302;
 
         if (ren) begin
+            if (raddr0 < TILEMAP_START) begin
+                rdata0 <= ram[raddr0];
+            end else if (raddr0 < FRAMEBUFFER_START) begin
+                rdata0 <= tile_map[raddr0 - TILEMAP_START];
+            end else if (raddr0 < IO_START) begin
+                rdata0 <= frame_buffer[raddr0 - FRAMEBUFFER_START];
+            end else if (raddr0 == PS2_REG) begin
+                rdata0 <= ps2_data_in;
+            end
+
             if (raddr1 < TILEMAP_START) begin
                 rdata1 <= ram[raddr1];
             end else if (raddr1 < FRAMEBUFFER_START) begin
