@@ -38,7 +38,10 @@ module execute(input clk,
   wire [15:0]rhs = mux_rhs ? imm : op2;
 
   wire [3:0]flags;
-  ALU ALU(clk, opcode, alu_op, lhs, rhs, bubble_in, addr, flags);
+  wire [15:0]alu_rslt;
+  ALU ALU(clk, opcode, alu_op, lhs, rhs, bubble_in, alu_rslt, flags);
+
+  assign addr = (opcode == 3'b111) ? decode_pc_out + 1 : alu_rslt;
 
   always @(posedge clk) begin
     result <= addr;
@@ -69,7 +72,7 @@ module execute(input clk,
                     (branch_code == 6'b010000) ? !flags[3] : // bno
                     0;
 
-  assign branch = !bubble_in && !halt_in_wb && taken && (opcode == 3'b110);
+  assign branch = !bubble_in && !halt_in_wb && (taken && (opcode == 3'b110) || opcode == 3'b111);
   wire [1:0]mux_pc = (opcode == 3'b111) ? 2'b10 :
                      (opcode == 3'b110 && branch) ? 2'b01 :
                      2'b00;
@@ -77,7 +80,7 @@ module execute(input clk,
   assign branch_tgt = 
             (mux_pc == 2'b00) ? decode_pc_out + 1 : 
             (mux_pc == 2'b01) ? decode_pc_out + imm + 1 :
-            (mux_pc == 2'b10) ? addr :
+            (mux_pc == 2'b10) ? op1 :
             0;
 
 endmodule

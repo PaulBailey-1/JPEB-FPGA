@@ -43,7 +43,7 @@ module ALU(input clk,
     (op == 3'b100) ? (s_1 + s_2) : // sw
     (op == 3'b101) ? (s_1 + s_2) : // lw
     (op == 3'b110) ? 0 : // branch
-    (op == 3'b111) ? s_1: // jalr
+    (op == 3'b111) ? s_1 : // jalr
     0;
 
   wire c;
