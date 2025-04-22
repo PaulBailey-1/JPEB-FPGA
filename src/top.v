@@ -67,7 +67,7 @@ module jpeb(
         .ren(mem_read_en), .raddr1(mem_read1_addr), .rdata1(mem_read1_data),
         .wen(mem_write_en), .waddr(mem_write_addr), .wdata(mem_write_data),
         .ps2_ren(ps2_ren),
-         .ps2_data_in(ps2_data_out),
+        .ps2_data_in(ps2_data_out),
         .pixel_x(pixel_addr_x), .pixel_y(pixel_addr_y), .pixel(display_pixel)
     );
 
