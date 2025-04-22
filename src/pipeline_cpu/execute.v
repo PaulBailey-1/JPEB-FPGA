@@ -5,12 +5,11 @@ module execute(input clk,
     input [15:0]imm, input [5:0]branch_code,
     input [2:0]mem_tgt, input [2:0]wb_tgt,
     input [15:0]reg_out_1, input [15:0]reg_out_2,
-    input [15:0]mem_instr_out, input [15:0]wb_result_out, input mem_bubble_out,
-    input [15:0]decode_pc_out,
+    input [15:0]wb_result_out, input [15:0]decode_pc_out, input halt_in,
     output reg [15:0]result, output [15:0]addr, output reg [15:0]store_data, output reg [2:0]opcode_out,
     output reg [2:0]tgt_out,
     output reg bubble_out,
-    output branch, output [15:0]branch_tgt
+    output branch, output [15:0]branch_tgt, output reg halt_out
   );
 
   initial begin
@@ -44,6 +43,7 @@ module execute(input clk,
     tgt_out <= tgt;
     opcode_out <= opcode;
     bubble_out <= halt_in_wb ? 1 : bubble_in;
+    halt_out <= halt_in;
   end
 
   wire taken;
