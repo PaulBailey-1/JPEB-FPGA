@@ -1,4 +1,4 @@
-cpu
+build
 cpu.vcd
 Assembler.py
 *.bin
