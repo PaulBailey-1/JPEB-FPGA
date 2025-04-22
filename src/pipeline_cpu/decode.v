@@ -52,11 +52,13 @@ module decode(input clk,
   assign left_shift_6 = {imm10, 6'b0};
 
   wire mux_imm = (opcode == 3'b011);
+  wire [15:0]imm;
   assign imm = mux_imm ? left_shift_6 : sign_ext_7;
 
 
   initial begin
     bubble_out <= 1;
+    tgt_out = 3'b000;
   end
 
   always @(posedge clk) begin
@@ -69,7 +71,7 @@ module decode(input clk,
     alu_op_out <= alu_op;
     bubble_out <= (flush || stall) ? 1 : bubble_in;
     pc_out <= pc_in;
-    halt_out <= (opcode == 3'b111) && (imm7 != 0);
+    halt_out <= (opcode == 3'b111) && (imm7 != 0) && !bubble_in;
   end
 
 endmodule

@@ -13,7 +13,7 @@ module fetch(input clk, input stall, input flush,
   always @(posedge clk) begin
     if (!stall) begin
       pc <= branch ? branch_tgt : pc + 1;
-      bubble_out <= !flush;
+      bubble_out <= flush;
       pc_out <= pc;
     end
   end

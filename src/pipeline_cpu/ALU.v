@@ -1,9 +1,14 @@
 
 module ALU(input clk,
     input [2:0]op, input [3:0]alu_op, input [15:0]s_1, input [15:0]s_2, 
+    input bubble,
     output [15:0]result, output reg [3:0]flags);
 
   // flags: O | S | Z | C
+
+  initial begin
+    flags <= 4'b0000;
+  end
 
   wire [16:0]sum;
   assign sum = {1'b0, s_1} + {1'b0, s_2};
@@ -73,7 +78,9 @@ module ALU(input clk,
   assign o = (result[15] != s_1[15]) & (s_1[15] == s_2[15]);
 
   always @(posedge clk) begin
-    flags <= {o, s, zero, c};
+    if (!bubble) begin
+      flags <= {o, s, zero, c};
+    end
   end
 
 endmodule

@@ -11,6 +11,8 @@ module memory(input clk,
 
   initial begin
     bubble_out <= 1;
+    halt_out <= 0;
+    tgt_out = 3'b000;
   end
 
   always @(posedge clk) begin
@@ -18,7 +20,7 @@ module memory(input clk,
     opcode_out <= opcode_in;
     result_out <= result_in;
     bubble_out <= halt_out ? 1 : bubble_in;
-    halt_out <= halt_in;
+    halt_out <= halt_in && !bubble_in;
   end
 
 endmodule

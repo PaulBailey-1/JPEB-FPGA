@@ -5,7 +5,7 @@ module regfile(input clk,
 
   reg [15:0]regfile[0:3'b111];
 
-  assign ret_val = regfile[3'h3];
+  assign ret_val = regfile[3'b011];
 
   always @(posedge clk) begin
     if (wen) begin

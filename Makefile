@@ -1,6 +1,6 @@
-V_SRC=${wildcard src/*.v} ${wildcard src/**/*.v}
+V_SRC=${wildcard src/pipeline_cpu/*.v}
 ASM_SRCS := $(wildcard tests/asm/*.s)
-V_SRCS := $(wildcard src/simple_cpu/*.v)
+V_SRCS := $(wildcard src/pipeline_cpu/*.v)
 HEXS     := $(ASM_SRCS:.s=.hex)
 SIM_OUTS := $(HEXS:.hex=.sim.out)
 
