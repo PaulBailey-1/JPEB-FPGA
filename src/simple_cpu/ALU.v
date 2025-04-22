@@ -8,12 +8,12 @@ module ALU(input clk,
   wire [16:0]sum;
   assign sum = {1'b0, s_1} + {1'b0, s_2};
   wire [16:0]carry_sum;
-  assign carry_sum = {1'b0, s_1} + {1'b1, s_2} + flags[0];
+  assign carry_sum = {1'b0, s_1} + {1'b1, s_2} + {15'b0, flags[0]};
 
   wire [16:0]diff;
-  assign diff = {1'b0, s_2} + {1'b1, 16'b1 + (~s_1)};
+  assign diff = {1'b0, s_2} + {1'b0, (~s_1)} + 17'b1;
   wire [16:0]carry_diff;
-  assign carry_diff = {1'b0, s_2} + {1'b0, 16'b1 + (~(s_1 + flags[0]))};
+  assign carry_diff = {1'b0, s_2} + {1'b0, ~(s_1 + {15'b0, ~flags[0]})} + 17'b1;
 
   assign result = (op == 3'b000) ? 
       ((alu_op == 4'b0000) ? (~(s_1 & s_2)) : // nand
