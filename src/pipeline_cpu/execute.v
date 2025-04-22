@@ -2,10 +2,13 @@
 module execute(input clk,
     input bubble_in, input halt_in_wb,
     input [2:0]opcode, input [2:0]s_1, input [2:0]s_2, input [2:0]tgt, input [3:0]alu_op,
+    input [15:0]imm, input [5:0]branch_code,
+    input [2:0]mem_tgt, input [2:0]wb_tgt,
     input [15:0]reg_out_1, input [15:0]reg_out_2,
     input [15:0]mem_instr_out, input [15:0]wb_result_out, input mem_bubble_out,
     input [15:0]decode_pc_out,
-    output reg [15:0]result, output [15:0]addr, output reg [15:0]store_data, output reg [15:0]instr_out,
+    output reg [15:0]result, output [15:0]addr, output reg [15:0]store_data, output reg [2:0]opcode_out,
+    output reg [2:0]tgt_out,
     output reg bubble_out,
     output branch, output [15:0]branch_tgt
   );
@@ -26,23 +29,11 @@ module execute(input clk,
     (wb_tgt == s_2 && s_2 != 3'b000) ? wb_result_out :
     reg_out_2;
 
-  wire [6:0]imm7;
-  assign imm7 = instr[6:0];
-
-  wire [9:0]imm10;
-  assign imm10 = instr[9:0];
-
-  wire [15:0]sign_ext_7;
-  assign sign_ext_7 = {{9{imm7[6]}}, imm7};
-
-  wire [15:0]left_shift_6;
-  assign left_shift_6 = {imm10, 6'b0};
-
   wire mux_lhs = (opcode == 3'b011);
   wire mux_rhs = (opcode == 3'b001) || (opcode == 3'b100) || (opcode == 3'b101) || (opcode == 3'b101);
 
-  assign lhs = mux_lhs ? left_shift_6 : d_1;
-  assign rhs = mux_rhs ? sign_ext_7 : d_2;
+  wire [15:0]lhs = mux_lhs ? imm : reg_out_1;
+  wire [15:0]rhs = mux_rhs ? imm : reg_out_2;
 
   wire [3:0]flags;
   ALU ALU(clk, opcode, alu_op, lhs, rhs, addr, flags);
@@ -50,12 +41,10 @@ module execute(input clk,
   always @(posedge clk) begin
     result <= addr;
     store_data <= op2;
-    instr_out <= instr_in;
+    tgt_out <= tgt;
+    opcode_out <= opcode;
     bubble_out <= halt_in_wb ? 1 : bubble_in;
   end
-
-  wire [5:0]branch_code;
-  assign branch_code = instr[12:7];
 
   wire taken;
   assign taken = (branch_code == 6'b000000) ? flags[1] : // bz beq
@@ -78,14 +67,14 @@ module execute(input clk,
                     0;
 
   assign branch = !bubble_in && !halt_in_wb && taken;
-  wire [1:0]mux_pc = (op == 3'b111) ? 2'b10 :
-                     (op == 3'b110 && branch) ? 2'b01 :
+  wire [1:0]mux_pc = (opcode == 3'b111) ? 2'b10 :
+                     (opcode == 3'b110 && branch) ? 2'b01 :
                      2'b00;
   
   assign branch_tgt = 
-            (mux_pc == 2'b00) ? pc + 1 : 
-            (mux_pc == 2'b01) ? pc + sign_ext_7 + 1 :
-            (mux_pc == 2'b10) ? rslt :
+            (mux_pc == 2'b00) ? decode_pc_out + 1 : 
+            (mux_pc == 2'b01) ? decode_pc_out + imm + 1 :
+            (mux_pc == 2'b10) ? addr :
             0;
 
 endmodule
