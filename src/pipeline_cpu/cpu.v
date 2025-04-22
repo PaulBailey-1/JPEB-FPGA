@@ -1,20 +1,18 @@
 `timescale 1ps/1ps
 
-module main();
-
-    initial begin
-        $dumpfile("cpu.vcd");
-        $dumpvars(0,main);
-    end
-
-    // clock 
-    wire clk;
-    clock c0(clk);
+module pipelined_cpu(
+  input clk, output mem_read_en,
+  output [15:0]mem_read0_addr, input [15:0]mem_read0_data,
+  output [15:0]mem_read1_addr, input [15:0]mem_read1_data,
+  output mem_write_en, output [15:0]mem_write_addr, output [15:0]mem_write_data,
+  output [15:0]ret_val
+);
 
     reg halt = 0;
 
-    wire [15:0] ret_val;
+`ifdef SIMULATION
     counter ctr(halt, clk, ret_val);
+`endif
 
     // read from memory
     wire [15:0]fetch_instr_out;
@@ -35,10 +33,11 @@ module main();
     wire mem_halt;
     assign flush = branch || mem_halt;
 
-    mem mem(clk,
-      fetch_addr, mem_out_1, 
-      addr, mem_out_2,
-      mem_we, exec_result_out, store_data);
+    assign mem_read0_addr = fetch_addr;
+    assign mem_out_1 = mem_read0_data;
+    assign mem_write_en = mem_we;
+    assign mem_write_addr = exec_result_out;
+    assign mem_write_data = store_data;
 
     wire stall;
     wire [15:0]branch_tgt;

@@ -74,7 +74,7 @@ module jpeb(
     wire [15:0]ret_val;
     assign leds = ret_val[7:0];
 
-    cpu cpu(
+    pipelined_cpu cpu(
         clk, mem_read_en,
         mem_read0_addr, mem_read0_data,
         mem_read1_addr, mem_read1_data,
