@@ -1,5 +1,5 @@
 
-module execute(input clk,
+module execute(input clk, input halt, 
     input bubble_in, input halt_in_wb,
     input [2:0]opcode, input [2:0]s_1, input [2:0]s_2, input [2:0]tgt, input [3:0]alu_op,
     input [15:0]imm, input [5:0]branch_code,
@@ -10,7 +10,8 @@ module execute(input clk,
     output reg [15:0]result, output [15:0]addr, output [15:0]store_data, output we, output reg [2:0]opcode_out,
     output reg [2:0]tgt_out,
     output reg bubble_out,
-    output branch, output [15:0]branch_tgt, output reg halt_out
+    output branch, output [15:0]branch_tgt, output reg halt_out,
+    output [3:0]flags
   );
 
   initial begin
@@ -40,7 +41,7 @@ module execute(input clk,
   wire [15:0]lhs = mux_lhs ? imm : op1;
   wire [15:0]rhs = mux_rhs ? imm : op2;
 
-  wire [3:0]flags;
+  // wire [3:0]flags;
   wire [15:0]alu_rslt;
   ALU ALU(clk, opcode, alu_op, lhs, rhs, bubble_in, alu_rslt, flags);
 
@@ -49,11 +50,13 @@ module execute(input clk,
   assign we = (opcode == 3'b100) && !bubble_in && !halt_out && !halt_in_wb;
 
   always @(posedge clk) begin
-    result <= addr;
-    tgt_out <= halt_in_wb ? 3'b000 : tgt;
-    opcode_out <= opcode;
-    bubble_out <= halt_in_wb ? 1 : bubble_in;
-    halt_out <= halt_in && !bubble_in;
+    if (~halt) begin
+      result <= addr;
+      tgt_out <= halt_in_wb ? 3'b000 : tgt;
+      opcode_out <= opcode;
+      bubble_out <= halt_in_wb ? 1 : bubble_in;
+      halt_out <= halt_in && !bubble_in;
+    end
   end
 
   wire taken;

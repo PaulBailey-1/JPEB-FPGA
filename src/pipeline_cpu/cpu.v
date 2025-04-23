@@ -5,7 +5,7 @@ module pipelined_cpu(
   output [15:0]mem_read0_addr, input [15:0]mem_read0_data,
   output [15:0]mem_read1_addr, input [15:0]mem_read1_data,
   output mem_write_en, output [15:0]mem_write_addr, output [15:0]mem_write_data,
-  output [15:0]ret_val
+  output [15:0]ret_val, output [3:0]flags, output [15:0]curr_pc
 );
 
     reg halt = 0;
@@ -49,13 +49,13 @@ module pipelined_cpu(
     wire [15:0]fetch_a_pc_out;
     wire fetch_a_bubble_out;
 
-    fetch_a fetch_a(clk, stall, flush, branch, branch_tgt,
+    fetch_a fetch_a(clk, stall | halt, flush, branch, branch_tgt,
       fetch_addr, fetch_a_pc_out, fetch_a_bubble_out);
 
     wire fetch_b_bubble_out;
     wire [15:0]fetch_b_pc_out;
 
-    fetch_b fetch_b(clk, stall, flush, fetch_a_bubble_out, fetch_a_pc_out,
+    fetch_b fetch_b(clk, stall | halt, flush, fetch_a_bubble_out, fetch_a_pc_out,
       fetch_b_bubble_out, fetch_b_pc_out);
 
     wire [15:0] decode_op1_out;
@@ -73,7 +73,7 @@ module pipelined_cpu(
     wire decode_halt_out;
     wire [2:0]mem_tgt_out;
 
-    decode decode(clk, flush,
+    decode decode(clk, flush, halt,
       mem_out_1, fetch_b_bubble_out, fetch_b_pc_out,
       reg_we, mem_tgt_out, reg_write_data,
       decode_op1_out, decode_op2_out, decode_pc_out,
@@ -90,26 +90,27 @@ module pipelined_cpu(
     wire [15:0]wb_result_out;
     wire [2:0]mem_opcode_out;
     
-    execute execute(clk, decode_bubble_out, mem_halt, 
+    assign curr_pc = decode_pc_out;
+    execute execute(clk, halt, decode_bubble_out, mem_halt, 
       decode_opcode_out, decode_s_1_out, decode_s_2_out, decode_tgt_out,
       decode_alu_op_out, decode_imm_out, decode_branch_code_out,
       mem_tgt_out, wb_tgt_out, decode_op1_out, decode_op2_out, mem_result_out, wb_result_out, decode_pc_out,
       decode_halt_out, mem_opcode_out, mem_out_2,
 
       exec_result_out, addr, store_data, mem_we, exec_opcode_out, exec_tgt_out, exec_bubble_out, 
-      branch, branch_tgt, exec_halt_out);
+      branch, branch_tgt, exec_halt_out, flags);
 
     wire mem_bubble_out;
 
-    memory memory(clk, 
+    memory memory(clk, halt,
       exec_bubble_out, exec_opcode_out, exec_tgt_out, exec_result_out, exec_halt_out,
       mem_tgt_out, mem_opcode_out, mem_result_out, mem_bubble_out, mem_halt);
 
-    writeback writeback(clk, mem_bubble_out, mem_tgt_out, mem_opcode_out, mem_result_out, mem_out_2,
+    writeback writeback(clk, halt, mem_bubble_out, mem_tgt_out, mem_opcode_out, mem_result_out, mem_out_2,
       reg_write_data, reg_we, wb_tgt_out, wb_result_out);
 
     always @(posedge clk) begin
-      halt <= mem_halt;
+      halt <= halt ? 1 : mem_halt;
     end
 
 endmodule

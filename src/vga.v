@@ -27,9 +27,9 @@ module vga(
     reg [9:0]v_counter = 0;
     reg [9:0]v_counter_buff = 0;
 
-    // Divides 100Mhz clk to 25MHz
+    // Divides 50Mhz clk to 25MHz
     reg [1:0]clk_div = 0;
-    wire pixel_clk = clk_div == 0 ? 1 : 0;
+    wire pixel_clk = clk_div[1];
     always @(posedge clk or posedge reset) begin
         if (reset)
             clk_div <= 0;

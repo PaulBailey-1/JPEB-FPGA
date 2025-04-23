@@ -1,6 +1,6 @@
 
 module decode(input clk,
-    input flush,
+    input flush, input halt,
 
     input [15:0]mem_out_1, input bubble_in, input [15:0]pc_in,
 
@@ -66,21 +66,23 @@ module decode(input clk,
   end
 
   always @(posedge clk) begin
-    opcode_out <= opcode;
-    s_1_out <= s_1;
-    s_2_out <= s_2;
-    tgt_out <= (flush || bubble_in || stall || (opcode == 3'b100 || opcode == 3'b110)) ? 3'b000 : r_a;
-    imm_out <= imm;
-    branch_code_out <= branch_code;
-    alu_op_out <= alu_op;
-    bubble_out <= (flush || stall) ? 1 : bubble_in;
-    pc_out <= pc_in;
-    halt_out <= (opcode == 3'b111) && (imm7 != 0) && !bubble_in;
+    if (~halt) begin
+      opcode_out <= opcode;
+      s_1_out <= s_1;
+      s_2_out <= s_2;
+      tgt_out <= (flush || bubble_in || stall || (opcode == 3'b100 || opcode == 3'b110)) ? 3'b000 : r_a;
+      imm_out <= imm;
+      branch_code_out <= branch_code;
+      alu_op_out <= alu_op;
+      bubble_out <= (flush || stall) ? 1 : bubble_in;
+      pc_out <= pc_in;
+      halt_out <= (opcode == 3'b111) && (imm7 != 0) && !bubble_in;
 
-    instr_buf <= mem_out_1;
+      instr_buf <= mem_out_1;
 
-    was_stall <= stall;
-    was_was_stall <= was_stall;
+      was_stall <= stall;
+      was_was_stall <= was_stall;
+    end
   end
 
 endmodule

@@ -8,7 +8,7 @@ module jpeb(
     output [3:0]vga_red,
     output [3:0]vga_green,
     output [3:0]vga_blue,
-    output status_led, output [7:0]leds
+    output status_led, output [11:0]leds
 `endif
     );
 
@@ -23,20 +23,27 @@ module jpeb(
 
     clock c0(clk);
 
-    wire [7:0] led;
-    wire sig_led;
+    wire [11:0] leds;
     wire status_led;
 
 `else
 
-    wire clk_100hz;
+    wire clk_100Mhz;
+    wire clk_50MHz;
     clk_wiz_0 instance_name(
         // Clock out ports
-        .clk_100hz(clk_100hz),     // output clk_100hz
-        .clk_50hz(clk),     // output clk_50hz
+        .clk_100hz(clk_100MHz),     // output clk_100hz
+        .clk_50hz(clk_50MHz),     // output clk_50hz
         // Clock in ports
         .clk_in1(board_clk)      // input clk_in1
     );
+    assign clk = clk_50MHz;
+
+    // reg [25:0]clk_div = 0;
+    // assign clk = clk_div[25];
+    // always @(posedge clk_50MHz ) begin
+    //     clk_div <= clk_div + 1;
+    // end
 
 `endif
 
@@ -62,6 +69,27 @@ module jpeb(
         .display_out(displaying)
     );
 
+    // wire        tready;
+    // wire        ready;
+    // wire        tstart;
+    // reg         start=0;
+    // reg         CLK50MHZ=0;
+    // wire [31:0] tbuf;
+    // reg  [15:0] keycodev=0;
+    // wire [15:0] keycode;
+    // wire [ 7:0] tbus;
+    // reg  [ 2:0] bcount=0;
+    // wire        flag;
+    // reg         cn=0;
+    
+    // uart_tx get_tx (
+    //     .clk    (clk),
+    //     .start  (tstart),
+    //     .tbus   (tbus),
+    //     .tx     (tx),
+    //     .ready  (tready)
+    // );
+
     // Memory
     wire [15:0]mem_read0_addr;
     wire [15:0]mem_read0_data;
@@ -82,14 +110,18 @@ module jpeb(
     );
 
     wire [15:0]ret_val;
-    assign leds = ret_val[7:0];
+    wire [15:0]cpu_pc;
+    wire [3:0]flags;
+    assign leds[7:0] = ret_val[7:0];
+    // assign leds[7:0] = cpu_pc[7:0];
+    assign leds[11:8] = flags;
 
     pipelined_cpu cpu(
         clk, mem_read_en,
         mem_read0_addr, mem_read0_data,
         mem_read1_addr, mem_read1_data,
         mem_write_en, mem_write_addr, mem_write_data,
-        ret_val
+        ret_val, flags, cpu_pc
     );
 
     // Blinks
