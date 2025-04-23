@@ -65,10 +65,10 @@ module mem(input clk,
     reg [15:0]display_tilemap_out;
     
     // Display pixel retrevial
-    wire [15:0] display_frame_addr = (({{6{1'b0}}, pixel_x} >> 3) + ({{6{1'b0}}, pixel_y} << 4)) >> 1; // (x / 8 + y /8 * 128) / 2
+    wire [15:0] display_frame_addr = ({9'b0, pixel_x[9:3]} + {2'b0, pixel_y, 4'b0}) >> 1; // (x / 8 + y /8 * 128) / 2
     wire [15:0] display_tile_addr_pair = display_framebuffer_out;
     wire [7:0] display_tile = ~display_odd_tile ? display_tile_addr_pair[7:0] : display_tile_addr_pair[15:8];
-    wire [15:0] pixel_idx = (display_tile << 6) + ((display_pixel_y & 10'h007) << 3) + (display_pixel_x & 10'h007); // tile_idx * 64 + py % 8 * 8 + px % 8
+    wire [15:0] pixel_idx = {2'b0, display_tile, 6'b0} + {10'b0, display_pixel_y[2:0], 3'b0} + {13'b0, display_pixel_x[2:0]}; // tile_idx * 64 + py % 8 * 8 + px % 8
     assign pixel = display_tilemap_out[11:0];
 
     always @(posedge clk) begin

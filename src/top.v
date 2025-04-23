@@ -8,6 +8,7 @@ module jpeb(
     output [3:0]vga_red,
     output [3:0]vga_green,
     output [3:0]vga_blue,
+    output uart_tx,
     output status_led, output [11:0]leds
 `endif
     );
@@ -39,6 +40,7 @@ module jpeb(
     );
     assign clk = clk_50MHz;
 
+    // 1 Hz divider
     // reg [25:0]clk_div = 0;
     // assign clk = clk_div[25];
     // always @(posedge clk_50MHz ) begin
@@ -63,32 +65,30 @@ module jpeb(
     assign vga_blue = pixel[11:8];
 
     vga vga(
-        .clk(clk), .reset(reset),
+        .clk(clk), .clk_100MHz(board_clk), .reset(reset),
         .h_sync_out(vga_h_sync), .v_sync_out(vga_v_sync),
         .pixel_addr_x(pixel_addr_x), .pixel_addr_y(pixel_addr_y),
         .display_out(displaying)
     );
 
-    // wire        tready;
-    // wire        ready;
-    // wire        tstart;
-    // reg         start=0;
-    // reg         CLK50MHZ=0;
-    // wire [31:0] tbuf;
-    // reg  [15:0] keycodev=0;
-    // wire [15:0] keycode;
-    // wire [ 7:0] tbus;
-    // reg  [ 2:0] bcount=0;
-    // wire        flag;
-    // reg         cn=0;
+    reg tx_start = 0;
+    reg [7:0]tx_bus = 0;
+    wire tx_ready;
     
-    // uart_tx get_tx (
-    //     .clk    (clk),
-    //     .start  (tstart),
-    //     .tbus   (tbus),
-    //     .tx     (tx),
-    //     .ready  (tready)
-    // );
+    uart_tx uart_tx (
+        .clk(board_clk),
+        .start(tx_start),
+        .tbus(tx_bus),
+        .tx(uart_tx),
+        .ready(tx_ready)
+    );
+
+    always @(posedge clk) begin
+        if (tx_ready) begin
+            tx_start <= 1;
+            tx_bus <= 8'h68;
+        end
+    end
 
     // Memory
     wire [15:0]mem_read0_addr;
