@@ -3,6 +3,12 @@
 @0
 00
 
+@5A // enter key
+0A
+
+@39 // spacebar
+20
+
 @1C // A
 61
 @32 // B
