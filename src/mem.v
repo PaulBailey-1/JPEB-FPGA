@@ -13,9 +13,9 @@ module mem(input clk,
     localparam IO_START = 16'hf000;
     localparam PS2_REG = 16'hf000;
 
-    (* ram_style = "block" *) reg [15:0]ram[0:16'h2000]; // 768Kb (0x0000-0xBFFF)
-    (* ram_style = "block" *) reg [15:0]tile_map[0:16'h2000]; // 128Kb (0xC000-0xDFFF)
-    (* ram_style = "block" *) reg [15:0]frame_buffer[0:16'h1000]; // 64Kb (0xE000-0xEFFF)
+    (* ram_style = "block" *) reg [15:0]ram[0:16'h7fff]; // 768Kb (0x0000-0xBFFF)
+    (* ram_style = "block" *) reg [15:0]tile_map[0:16'h1fff]; // 128Kb (0xC000-0xDFFF)
+    (* ram_style = "block" *) reg [15:0]frame_buffer[0:16'h0fff]; // 64Kb (0xE000-0xEFFF)
 
 `ifdef SIMULATION
     reg [255:0] filepath;
@@ -48,10 +48,12 @@ module mem(input clk,
     reg [15:0]framebuffer_data1_out;
 
     wire [15:0]data0_out =  raddr0_buf < TILEMAP_START ? ram_data0_out :
-                            raddr0_buf < FRAMEBUFFER_START ? framebuffer_data0_out :
+                            raddr0_buf < FRAMEBUFFER_START ? tilemap_data0_out :
+                            raddr0_buf < IO_START ? framebuffer_data0_out :
                             ps2_data_in;
     wire [15:0]data1_out =  raddr1_buf < TILEMAP_START ? ram_data1_out :
-                            raddr1_buf < FRAMEBUFFER_START ? framebuffer_data1_out :
+                            raddr1_buf < FRAMEBUFFER_START ? tilemap_data1_out :
+                            raddr1_buf < IO_START ? framebuffer_data1_out :
                             ps2_data_in;
 
     assign ps2_ren = raddr1 == PS2_REG & ren;
@@ -63,11 +65,11 @@ module mem(input clk,
     reg [15:0]display_tilemap_out;
     
     // Display pixel retrevial
-    // wire [15:0] display_frame_addr = (({{6{1'b0}}, pixel_x} >> 3) + ({{6{1'b0}}, pixel_y} << 4)) >> 1; // (x / 8 + y /8 * 128) / 2
-    // wire [15:0] display_tile_addr_pair = display_framebuffer_out;
-    // wire [7:0] display_tile = ~display_odd_tile ? display_tile_addr_pair[7:0] : display_tile_addr_pair[15:8];
-    // wire [15:0] pixel_idx = (display_tile << 6) + ((display_pixel_y & 10'h007) << 3) + (display_pixel_x & 10'h007); // tile_idx * 64 + py % 8 * 8 + px % 8
-    // assign pixel = display_tilemap_out[11:0];
+    wire [15:0] display_frame_addr = (({{6{1'b0}}, pixel_x} >> 3) + ({{6{1'b0}}, pixel_y} << 4)) >> 1; // (x / 8 + y /8 * 128) / 2
+    wire [15:0] display_tile_addr_pair = display_framebuffer_out;
+    wire [7:0] display_tile = ~display_odd_tile ? display_tile_addr_pair[7:0] : display_tile_addr_pair[15:8];
+    wire [15:0] pixel_idx = (display_tile << 6) + ((display_pixel_y & 10'h007) << 3) + (display_pixel_x & 10'h007); // tile_idx * 64 + py % 8 * 8 + px % 8
+    assign pixel = display_tilemap_out[11:0];
 
     always @(posedge clk) begin
 
@@ -84,11 +86,11 @@ module mem(input clk,
         rdata0 <= data0_out;
         rdata1 <= data1_out;
 
-        // display_framebuffer_out <= frame_buffer[display_frame_addr];
-        // display_odd_tile <= display_frame_addr[0];
-        // display_pixel_x <= pixel_x;
-        // display_pixel_y <= pixel_y;
-        // display_tilemap_out <= tile_map[pixel_idx];
+        display_framebuffer_out <= frame_buffer[display_frame_addr];
+        display_odd_tile <= display_frame_addr[0];
+        display_pixel_x <= pixel_x;
+        display_pixel_y <= pixel_y;
+        display_tilemap_out <= tile_map[pixel_idx];
 
         if (wen) begin
             if (waddr < TILEMAP_START) begin

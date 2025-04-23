@@ -2,7 +2,7 @@
 
 module jpeb(
 `ifndef SIMULATION
-    input clk,
+    input board_clk,
     input ps2_clk, input ps2_data,
     output vga_h_sync, vga_v_sync,
     output [3:0]vga_red,
@@ -13,6 +13,7 @@ module jpeb(
     );
 
     reg reset = 0;
+    wire clk;
 
 `ifdef SIMULATION
     initial begin
@@ -20,13 +21,22 @@ module jpeb(
         $dumpvars(0, jpeb);
     end
 
-    // clock
-    wire clk;
     clock c0(clk);
 
     wire [7:0] led;
     wire sig_led;
     wire status_led;
+
+`else
+
+    wire clk_100hz;
+    clk_wiz_0 instance_name(
+        // Clock out ports
+        .clk_100hz(clk_100hz),     // output clk_100hz
+        .clk_50hz(clk),     // output clk_50hz
+        // Clock in ports
+        .clk_in1(board_clk)      // input clk_in1
+    );
 
 `endif
 

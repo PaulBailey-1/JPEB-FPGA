@@ -1,0 +1,1 @@
+rsync -az /mnt/c/Users/paulr/Documents/FPGA/JPEB-FPGA ..

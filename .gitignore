@@ -5,5 +5,3 @@ Assembler.py
 *.out
 *.vcd
 data/program.hex
-*.sh
-
