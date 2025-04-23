@@ -4,7 +4,7 @@
 // and https://github.com/ColtonBeery/Basys3_VGA_Testbench/tree/master
 
 module vga(
-    input clk, input reset, 
+    input clk, input clk_100MHz, input reset, 
     output h_sync_out, output v_sync_out,
     output [9:0]pixel_addr_x, output [9:0]pixel_addr_y,
     output display_out
@@ -29,8 +29,8 @@ module vga(
 
     // Divides 50Mhz clk to 25MHz
     reg [1:0]clk_div = 0;
-    wire pixel_clk = clk_div[1];
-    always @(posedge clk or posedge reset) begin
+    wire pixel_clk = clk_div == 0 ? 1 : 0;
+    always @(posedge clk_100MHz or posedge reset) begin
         if (reset)
             clk_div <= 0;
         else
