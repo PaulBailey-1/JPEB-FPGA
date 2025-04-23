@@ -88,17 +88,17 @@ module pipelined_cpu(
     wire exec_halt_out;
     wire [2:0]wb_tgt_out;
     wire [15:0]wb_result_out;
+    wire [2:0]mem_opcode_out;
     
     execute execute(clk, decode_bubble_out, mem_halt, 
       decode_opcode_out, decode_s_1_out, decode_s_2_out, decode_tgt_out,
       decode_alu_op_out, decode_imm_out, decode_branch_code_out,
       mem_tgt_out, wb_tgt_out, decode_op1_out, decode_op2_out, mem_result_out, wb_result_out, decode_pc_out,
-      decode_halt_out, 
+      decode_halt_out, mem_opcode_out, mem_out_2,
 
       exec_result_out, addr, store_data, mem_we, exec_opcode_out, exec_tgt_out, exec_bubble_out, 
       branch, branch_tgt, exec_halt_out);
 
-    wire [2:0]mem_opcode_out;
     wire mem_bubble_out;
 
     memory memory(clk, 

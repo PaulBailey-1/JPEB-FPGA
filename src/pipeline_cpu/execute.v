@@ -6,6 +6,7 @@ module execute(input clk,
     input [2:0] mem_tgt, input [2:0]wb_tgt,
     input [15:0]reg_out_1, input [15:0]reg_out_2,
     input [15:0]mem_result_out, input [15:0]wb_result_out, input [15:0]decode_pc_out, input halt_in,
+    input [2:0]mem_opcode_out, input [15:0]mem_out_2,
     output reg [15:0]result, output [15:0]addr, output [15:0]store_data, output we, output reg [2:0]opcode_out,
     output reg [2:0]tgt_out,
     output reg bubble_out,
@@ -22,12 +23,14 @@ module execute(input clk,
 
   assign op1 = 
     (tgt_out == s_1 && s_1 != 3'b000) ? result :
-    (mem_tgt == s_1 && s_1 != 3'b000) ? mem_result_out :
+    (mem_tgt == s_1 && s_1 != 3'b000) ? 
+      ((mem_opcode_out == 3'b101) ? mem_out_2 : mem_result_out) :
     (wb_tgt == s_1 && s_1 != 3'b000) ? wb_result_out :
     reg_out_1;
   assign op2 = 
     (tgt_out == s_2 && s_2 != 3'b000) ? result :
-    (mem_tgt == s_2 && s_2 != 3'b000) ? mem_result_out :
+    (mem_tgt == s_2 && s_2 != 3'b000) ?  
+      ((mem_opcode_out == 3'b101) ? mem_out_2 : mem_result_out) :
     (wb_tgt == s_2 && s_2 != 3'b000) ? wb_result_out :
     reg_out_2;
 
@@ -63,7 +66,7 @@ module execute(input clk,
                     (branch_code == 6'b000110) ? 1 : // jmp
                     (branch_code == 6'b000111) ? !flags[0] : // bnc
                     (branch_code == 6'b001000) ? !flags[1] && flags[2] == flags[3] : // bg
-                    (branch_code == 6'b001001) ? flags[2] == flags[3] : // bge
+                    (branch_code == 6'b001001) ? flags[2] == flags[3] || flags[1] : // bge
                     (branch_code == 6'b001010) ? flags[2] != flags[3] && !flags[1] : // bl
                     (branch_code == 6'b001011) ? flags[2] != flags[3] || flags[1] : // ble
                     (branch_code == 6'b001100) ? !flags[1] && flags[0] : // ba
