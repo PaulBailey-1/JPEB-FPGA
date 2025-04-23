@@ -22,7 +22,13 @@ module jpeb(
         $dumpvars(0, jpeb);
     end
 
-    clock c0(clk);
+    clock c0(board_clk);
+
+    reg clk_div_0 = 0;
+    assign clk = clk_div_0;
+    always @(posedge board_clk) begin
+        clk_div_0 <= ~clk_div_0;
+    end
 
     wire [11:0] leds;
     wire status_led;

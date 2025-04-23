@@ -4,6 +4,7 @@ Assembler.py
 *.bin
 *.out
 *.vcd
+*.gtkw
 data/program.hex
 *.sh
 
