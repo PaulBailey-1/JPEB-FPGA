@@ -15,10 +15,15 @@ module ALU(input clk,
   wire [16:0]carry_sum;
   assign carry_sum = {1'b0, s_1} + {1'b1, s_2} + {15'b0, flags[0]};
 
+  wire [15:0]s_1_sub;
+  assign s_1_sub = 16'b1 + (~s_1);
+  wire [15:0]s_1_subc;
+  assign s_1_subc = 16'b1 + ~(s_1 + {15'b0, ~flags[0]});
+
   wire [16:0]diff;
-  assign diff = {1'b0, s_2} + {1'b0, (~s_1)} + 17'b1;
+  assign diff = {1'b0, s_2} + {1'b0, s_1_sub};
   wire [16:0]carry_diff;
-  assign carry_diff = {1'b0, s_2} + {1'b0, ~(s_1 + {15'b0, ~flags[0]})} + 17'b1;
+  assign carry_diff = {1'b0, s_2} + {1'b0, s_1_subc};
 
   assign result = (op == 3'b000) ? 
       ((alu_op == 4'b0000) ? (~(s_1 & s_2)) : // nand
@@ -74,8 +79,12 @@ module ALU(input clk,
   wire s;
   assign s = result[15];
 
+  wire [15:0]s_1_for_o = (alu_op == 4'b0100) ? s_1_subc :
+                         (alu_op == 4'b0110) ? s_1_sub :
+                         s_1;
+
   wire o;
-  assign o = (result[15] != s_1[15]) & (s_1[15] == s_2[15]);
+  assign o = (result[15] != s_1_for_o[15]) & (s_1_for_o[15] == s_2[15]);
 
   always @(posedge clk) begin
     if (!bubble) begin
