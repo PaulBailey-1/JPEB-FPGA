@@ -63,7 +63,7 @@ module execute(input clk,
                     (branch_code == 6'b000110) ? 1 : // jmp
                     (branch_code == 6'b000111) ? !flags[0] : // bnc
                     (branch_code == 6'b001000) ? !flags[1] && flags[2] == flags[3] : // bg
-                    (branch_code == 6'b001001) ? flags[2] == flags[3] : // bae
+                    (branch_code == 6'b001001) ? flags[2] == flags[3] : // bge
                     (branch_code == 6'b001010) ? flags[2] != flags[3] && !flags[1] : // bl
                     (branch_code == 6'b001011) ? flags[2] != flags[3] || flags[1] : // ble
                     (branch_code == 6'b001100) ? !flags[1] && flags[0] : // ba
@@ -79,8 +79,8 @@ module execute(input clk,
                      2'b00;
   
   assign branch_tgt = 
-            (mux_pc == 2'b00) ? decode_pc_out + 1 : 
-            (mux_pc == 2'b01) ? decode_pc_out + imm + 1 :
+            (mux_pc == 2'b00) ? decode_pc_out + 16'h0001 : 
+            (mux_pc == 2'b01) ? decode_pc_out + imm + 16'h0001 :
             (mux_pc == 2'b10) ? op1 :
             0;
 

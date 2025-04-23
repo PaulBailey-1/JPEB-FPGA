@@ -8,8 +8,8 @@ module counter(input isHalt, input clk, input [15:0]ret_val);
             $display("Finished with << %0d >>", ret_val);
             $finish;
         end
-        if (count == 500) begin
-            $display("ran for 500 cycles");
+        if (count == 50000) begin
+            $display("ran for 50000 cycles");
             $finish;
         end
         count <= count + 1;
