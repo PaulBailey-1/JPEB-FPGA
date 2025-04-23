@@ -1,4 +1,4 @@
-
+`timescale 1ps/1ps
 
 module writeback(input clk, input halt, input bubble_in, 
     input [2:0]tgt_in, input [2:0]opcode_in, input [15:0]alu_result, input [15:0]mem_result,
@@ -7,7 +7,7 @@ module writeback(input clk, input halt, input bubble_in,
   );
 
   initial begin
-    wb_tgt_out <= 3'b000;
+    wb_tgt_out = 3'b000;
   end
 
   always @(posedge clk) begin

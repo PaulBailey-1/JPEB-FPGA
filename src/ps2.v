@@ -2,7 +2,7 @@
 
 module ps2(input ps2_clk, input ps2_data, input clk, input ren, output [15:0]data);
 
-    reg [9:0]sr = 9'b0;
+    reg [9:0]sr = 10'b0;
     reg [3:0]bit_count = 0;
 
     // Convert scan to ascii

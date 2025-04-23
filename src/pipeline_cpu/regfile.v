@@ -1,3 +1,5 @@
+`timescale 1ps/1ps
+
 module regfile(input clk,
     input [2:0]raddr0, output reg [15:0]rdata0,
     input [2:0]raddr1, output reg [15:0]rdata1,

@@ -5,3 +5,4 @@ Assembler.py
 *.out
 *.vcd
 data/program.hex
+obj_dir/*

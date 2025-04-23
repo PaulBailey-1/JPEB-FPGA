@@ -1,4 +1,4 @@
-
+`timescale 1ps/1ps
 
 module fetch_a(input clk, input stall, input flush,
     input branch, input [15:0]branch_tgt,
@@ -10,8 +10,8 @@ module fetch_a(input clk, input stall, input flush,
   assign fetch_addr = branch ? branch_tgt : (stall ? pc - 16'h1 : pc);
 
   initial begin
-    bubble_out <= 1;
-    pc <= 16'h0000;
+    bubble_out = 1;
+    pc = 16'h0000;
   end
 
   always @(posedge clk) begin
@@ -29,7 +29,7 @@ module fetch_b(input clk, input stall, input flush, input bubble_in,
   );
 
     initial begin
-      bubble_out <= 1;
+      bubble_out = 1;
     end
 
     always @(posedge clk) begin 

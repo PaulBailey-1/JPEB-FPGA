@@ -1,3 +1,4 @@
+`timescale 1ps/1ps
 
 module ALU(input clk,
     input [2:0]op, input [3:0]alu_op, input [15:0]s_1, input [15:0]s_2, 
@@ -7,7 +8,7 @@ module ALU(input clk,
   // flags: O | S | Z | C
 
   initial begin
-    flags <= 4'b0000;
+    flags = 4'b0000;
   end
 
   wire [16:0]sum;

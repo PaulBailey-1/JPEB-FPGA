@@ -1,3 +1,5 @@
+`timescale 1ps/1ps
+
 module counter(input isHalt, input clk, input [15:0]ret_val);
 
     reg [31:0] count = 0;

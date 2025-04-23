@@ -1,3 +1,4 @@
+`timescale 1ps/1ps
 
 module decode(input clk,
     input flush, input halt,
@@ -61,7 +62,7 @@ module decode(input clk,
 
 
   initial begin
-    bubble_out <= 1;
+    bubble_out = 1;
     tgt_out = 3'b000;
   end
 

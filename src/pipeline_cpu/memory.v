@@ -1,3 +1,4 @@
+`timescale 1ps/1ps
 
 module memory(input clk, input halt,
     input bubble_in,
@@ -8,8 +9,8 @@ module memory(input clk, input halt,
   );
 
   initial begin
-    bubble_out <= 1;
-    halt_out <= 0;
+    bubble_out = 1;
+    halt_out = 0;
     tgt_out = 3'b000;
   end
 

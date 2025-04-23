@@ -1,3 +1,4 @@
+`timescale 1ps/1ps
 
 module execute(input clk, input halt, 
     input bubble_in, input halt_in_wb,
@@ -15,7 +16,7 @@ module execute(input clk, input halt,
   );
 
   initial begin
-    bubble_out <= 1;
+    bubble_out = 1;
     tgt_out = 3'b000;
   end
 
