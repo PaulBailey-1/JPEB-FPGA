@@ -102,6 +102,10 @@ module mem2(input clk,
     reg [15:0]framebuffer_data0_out;
     reg [15:0]framebuffer_data1_out;
 
+    reg [15:0]scale_reg;
+    reg [15:0]vscroll_reg;
+    reg [15:0]hscroll_reg;
+
     wire [9:0]pixel_x = (pixel_x_in >> scale_reg) + hscroll_reg;
     wire [9:0]pixel_y = (pixel_y_in >> scale_reg) + vscroll_reg;
 
@@ -148,9 +152,6 @@ module mem2(input clk,
     reg [9:0]display_pixel_y;
     reg [15:0]display_tilemap_out;
 
-    reg [15:0]scale_reg;
-    reg [15:0]vscroll_reg;
-    reg [15:0]hscroll_reg;
     reg [15:0]sprite_0_x;
     reg [15:0]sprite_0_y;
     reg [15:0]sprite_1_x;

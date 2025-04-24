@@ -78,17 +78,10 @@ module jpeb(
     );
 
     // UART
-    wire send_trig;
-    reg tx_en_ff = 1;
-    wire tx_en = send_trig != tx_en_ff;
-    reg [7:0]tx_data = 8'h65;
+    wire uart_tx_en;
+    wire [7:0]uart_tx_data;
 
-    uart uart(.clk(clk), .baud_clk(board_clk), .tx_en(ps2_ready_flag), .tx_data(ps2_data_out[7:0]), .tx(uart_tx));
-
-    always @(posedge clk) begin
-        tx_en_ff <= send_trig;
-        tx_data <= ps2_data_out[7:0];
-    end
+    uart uart(.clk(clk), .baud_clk(board_clk), .tx_en(uart_tx_en), .tx_data(uart_tx_data), .tx(uart_tx));
 
     // Memory
     wire [15:0]mem_read0_addr;
@@ -106,8 +99,8 @@ module jpeb(
         .wen(mem_write_en), .waddr(mem_write_addr), .wdata(mem_write_data),
         .ps2_ren(ps2_ren),
         .ps2_data_in(ps2_data_out),
-        .pixel_x_in(pixel_addr_x), .pixel_y_in(pixel_addr_y), .pixel(display_pixel)
-        // .uart_tx(), .uart_tx_wen()
+        .pixel_x_in(pixel_addr_x), .pixel_y_in(pixel_addr_y), .pixel(display_pixel),
+        .uart_tx_data(uart_tx_data), .uart_tx_wen(uart_tx_en)
     );
 
     wire [15:0]ret_val;
