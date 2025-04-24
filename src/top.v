@@ -58,7 +58,7 @@ module jpeb(
     // PS/2
     wire ps2_ren;
     wire [15:0]ps2_data_out;
-    ps2 ps2(.ps2_clk(ps2_clk), .ps2_data(ps2_data), .clk(clk), .ren(ps2_ren), .data(ps2_data_out));
+    ps2 ps2(.ps2_clk(ps2_clk), .ps2_data(ps2_data), .clk(board_clk), .ren(ps2_ren), .data(ps2_data_out));
 
     // VGA
     wire [9:0]pixel_addr_x;
@@ -83,10 +83,11 @@ module jpeb(
     wire tx_en = send_trig != tx_en_ff;
     reg [7:0]tx_data = 8'h65;
 
-    uart uart(.clk(clk), .tx_en(tx_en), .tx_data(tx_data), .tx(uart_tx));
+    uart uart(.clk(clk), .baud_clk(board_clk), .tx_en(tx_en), .tx_data(tx_data), .tx(uart_tx));
 
     always @(posedge clk) begin
         tx_en_ff <= send_trig;
+        tx_data <= ps2_data_out[7:0];
     end
 
     // Memory
@@ -115,7 +116,9 @@ module jpeb(
     // assign leds[7:0] = ret_val[7:0];
     // assign leds[7:0] = cpu_pc[7:0];
     // assign leds[11:8] = flags;
-    assign leds[10:0] = ps2_data_out;
+    assign leds[7:0] = ps2_data_out[7:0];
+    reg [3:0]zero = 0;
+    assign leds[11:8] = zero;
 
     pipelined_cpu cpu(
         clk, mem_read_en,

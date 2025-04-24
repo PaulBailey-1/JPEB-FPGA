@@ -1,39 +1,31 @@
 `timescale 1ps/1ps
 
 module uart(
-    input clk, 
+    input clk, input baud_clk,
     input tx_en, input [7:0]tx_data,
     output tx
 );
 
     wire [7:0]tx_buf_count;
     wire tx_send;
-    // wire [7:0]tx_bus;
-    reg [7:0]tx_bus;
+    wire [7:0]tx_bus;
 
-    // fifo tx_buf(
-    //     .clk(clk), .wen(tx_en), .wdata(tx_data),
-    //     .ren(tx_send), .rdata(tx_bus),
-    //     .size(tx_buf_count)
-    // );
+    fifo tx_buf(
+        .clk(clk), .wen(tx_en), .wdata(tx_data),
+        .ren(tx_send), .rdata(tx_bus),
+        .size(tx_buf_count)
+    );
 
     reg tx_start = 0;
     wire tx_ready;
 
-    uart_tx uart_tx(.clk(clk), .tbus(tx_bus), .start(tx_start), .tx(tx), .ready(tx_ready));
+    uart_tx uart_tx(.clk(baud_clk), .tbus(tx_bus), .start(tx_start), .tx(tx), .ready(tx_ready));
+
+    assign tx_send = tx_ready & (tx_buf_count > 0);
 
     always @(posedge clk) begin
-        if (tx_ready) begin
-            tx_start <= 1;
-            tx_bus <= 8'h68;
-        end
+        tx_start <= tx_send;
     end
-
-    // assign tx_send = tx_ready & (tx_buf_count > 0);
-
-    // always @(posedge clk) begin
-    //     tx_start <= tx_send;
-    // end
 
 endmodule
 

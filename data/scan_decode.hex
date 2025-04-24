@@ -1,13 +1,14 @@
-// scan code set 3
+// scan code set 2
 
 @0
 00
 
 @5A // enter key
 0A
-
 @29 // spacebar
 20
+@FF
+FF
 
 @1C // A
 61
