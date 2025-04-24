@@ -322,43 +322,62 @@ module mem2(input clk,
                 tile_map[waddr - TILEMAP_START] <= wdata;
             end else if (waddr < IO_START) begin
                 frame_buffer[waddr - FRAMEBUFFER_START] <= wdata;
-            end else if (waddr == SPRITE_0_X) begin
+            end
+            if (waddr == SPRITE_0_X) begin
                 sprite_0_x <= wdata;
-            end else if (waddr == SPRITE_0_Y) begin
+            end
+            if (waddr == SPRITE_0_Y) begin
                 sprite_0_x <= wdata;
-            end else if (waddr == SPRITE_1_X) begin
+            end
+            if (waddr == SPRITE_1_X) begin
                 sprite_1_x <= wdata;
-            end else if (waddr == SPRITE_1_Y) begin
+            end
+            if (waddr == SPRITE_1_Y) begin
                 sprite_1_x <= wdata;
-            end else if (waddr == SPRITE_2_X) begin
+            end
+            if (waddr == SPRITE_2_X) begin
                 sprite_2_x <= wdata;
-            end else if (waddr == SPRITE_2_Y) begin
+            end
+            if (waddr == SPRITE_2_Y) begin
                 sprite_2_x <= wdata;
-            end else if (waddr == SPRITE_3_X) begin
+            end
+            if (waddr == SPRITE_3_X) begin
                 sprite_3_x <= wdata;
-            end else if (waddr == SPRITE_3_Y) begin
+            end
+            if (waddr == SPRITE_3_Y) begin
                 sprite_3_x <= wdata;
-            end else if (waddr == SPRITE_4_X) begin
+            end
+            if (waddr == SPRITE_4_X) begin
                 sprite_4_x <= wdata;
-            end else if (waddr == SPRITE_4_Y) begin
+            end
+            if (waddr == SPRITE_4_Y) begin
                 sprite_4_x <= wdata;
-            end else if (waddr == SPRITE_5_X) begin
+            end
+            if (waddr == SPRITE_5_X) begin
                 sprite_5_x <= wdata;
-            end else if (waddr == SPRITE_5_Y) begin
+            end
+            if (waddr == SPRITE_5_Y) begin
                 sprite_5_x <= wdata;
-            end else if (waddr == SPRITE_6_X) begin
+            end
+            if (waddr == SPRITE_6_X) begin
                 sprite_6_x <= wdata;
-            end else if (waddr == SPRITE_6_Y) begin
+            end
+            if (waddr == SPRITE_6_Y) begin
                 sprite_6_x <= wdata;
-            end else if (waddr == SPRITE_7_X) begin
+            end
+            if (waddr == SPRITE_7_X) begin
                 sprite_7_x <= wdata;
-            end else if (waddr == SPRITE_7_Y) begin
+            end
+            if (waddr == SPRITE_7_Y) begin
                 sprite_7_x <= wdata;
-            end else if (waddr == SCALE_REG) begin
+            end
+            if (waddr == SCALE_REG) begin
                 scale_reg <= wdata;
-            end else if (waddr == HSCROLL_REG) begin
+            end
+            if (waddr == HSCROLL_REG) begin
                 hscroll_reg <= wdata;
-            end else if (waddr == VSCROLL_REG) begin
+            end
+            if (waddr == VSCROLL_REG) begin
                 vscroll_reg <= wdata;
             end
         end
