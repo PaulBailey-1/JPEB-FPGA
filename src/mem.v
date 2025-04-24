@@ -11,7 +11,7 @@ module mem(input clk,
     localparam TILEMAP_START = 16'hc000;
     localparam FRAMEBUFFER_START = 16'he000;
     localparam IO_START = 16'hf000;
-    localparam PS2_REG = 16'hf000;
+    localparam PS2_REG = 16'hffff;
 
     (* ram_style = "block" *) reg [15:0]ram[0:16'hbfff]; // 768Kb (0x0000-0xBFFF)
     (* ram_style = "block" *) reg [15:0]tile_map[0:16'h1fff]; // 128Kb (0xC000-0xDFFF)

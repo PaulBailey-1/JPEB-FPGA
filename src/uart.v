@@ -1,5 +1,69 @@
 `timescale 1ps/1ps
 
+module uart(
+    input clk, 
+    input tx_en, input [7:0]tx_data,
+    output tx
+);
+
+    wire [7:0]tx_buf_count;
+    wire tx_send;
+    // wire [7:0]tx_bus;
+    reg [7:0]tx_bus;
+
+    // fifo tx_buf(
+    //     .clk(clk), .wen(tx_en), .wdata(tx_data),
+    //     .ren(tx_send), .rdata(tx_bus),
+    //     .size(tx_buf_count)
+    // );
+
+    reg tx_start = 0;
+    wire tx_ready;
+
+    uart_tx uart_tx(.clk(clk), .tbus(tx_bus), .start(tx_start), .tx(tx), .ready(tx_ready));
+
+    always @(posedge clk) begin
+        if (tx_ready) begin
+            tx_start <= 1;
+            tx_bus <= 8'h68;
+        end
+    end
+
+    // assign tx_send = tx_ready & (tx_buf_count > 0);
+
+    // always @(posedge clk) begin
+    //     tx_start <= tx_send;
+    // end
+
+endmodule
+
+module fifo(
+    input clk, input wen, input [7:0]wdata,
+    input ren, output reg [7:0]rdata, 
+    output wire [7:0]size
+);
+
+    reg [7:0]data[0:255];
+    reg [7:0]read_ptr = 0;
+    reg [7:0]write_ptr = 0;
+    reg [7:0]count = 0;
+    assign size = count;
+
+    always @(posedge clk) begin
+        if (wen) begin
+            data[write_ptr] <= wdata;
+            write_ptr <= write_ptr + 1;
+            count <= count + 1;
+        end
+        if (ren) begin
+            rdata <= data[read_ptr];
+            read_ptr <= read_ptr + 1;
+            count <= count - 1;
+        end
+    end
+
+endmodule
+
 // From demos
 // https://github.com/Digilent/Basys-3-HW/blob/63134db53d58a894ba33ce24590ef38bb833772c/src/hdl/uart_tx.v
 

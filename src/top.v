@@ -77,23 +77,16 @@ module jpeb(
         .display_out(displaying)
     );
 
-    reg tx_start = 0;
-    reg [7:0]tx_bus = 0;
-    wire tx_ready;
-    
-    uart_tx uart_tx (
-        .clk(board_clk),
-        .start(tx_start),
-        .tbus(tx_bus),
-        .tx(uart_tx),
-        .ready(tx_ready)
-    );
+    // UART
+    wire send_trig;
+    reg tx_en_ff = 1;
+    wire tx_en = send_trig != tx_en_ff;
+    reg [7:0]tx_data = 8'h65;
+
+    uart uart(.clk(clk), .tx_en(tx_en), .tx_data(tx_data), .tx(uart_tx));
 
     always @(posedge clk) begin
-        if (tx_ready) begin
-            tx_start <= 1;
-            tx_bus <= 8'h68;
-        end
+        tx_en_ff <= send_trig;
     end
 
     // Memory
@@ -113,14 +106,16 @@ module jpeb(
         .ps2_ren(ps2_ren),
         .ps2_data_in(ps2_data_out),
         .pixel_x(pixel_addr_x), .pixel_y(pixel_addr_y), .pixel(display_pixel)
+        // .uart_tx(), .uart_tx_wen()
     );
 
     wire [15:0]ret_val;
     wire [15:0]cpu_pc;
     wire [3:0]flags;
-    assign leds[7:0] = ret_val[7:0];
+    // assign leds[7:0] = ret_val[7:0];
     // assign leds[7:0] = cpu_pc[7:0];
-    assign leds[11:8] = flags;
+    // assign leds[11:8] = flags;
+    assign leds[10:0] = ps2_data_out;
 
     pipelined_cpu cpu(
         clk, mem_read_en,
@@ -133,6 +128,7 @@ module jpeb(
     // Blinks
     reg [24:0] led_counter = 0;
     assign status_led = led_counter[24];
+    assign send_trig = led_counter[24];
     always @(posedge clk) begin
         led_counter <= led_counter + 1;
     end
