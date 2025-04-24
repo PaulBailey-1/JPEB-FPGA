@@ -5,7 +5,7 @@ module mem(input clk,
     input ren, input [15:0]raddr1, output reg [15:0]rdata1,
     input wen, input [15:0]waddr, input [15:0]wdata,
     output ps2_ren, input [15:0]ps2_data_in,
-    input [9:0]pixel_x, input [9:0]pixel_y, output [11:0]pixel
+    input [9:0]pixel_x_in, input [9:0]pixel_y_in, output [11:0]pixel
 );
 
     localparam TILEMAP_START = 16'hc000;
@@ -49,6 +49,9 @@ module mem(input clk,
     reg [15:0]tilemap_data1_out;
     reg [15:0]framebuffer_data0_out;
     reg [15:0]framebuffer_data1_out;
+
+    wire [9:0]pixel_x = (pixel_x_in >> scale_reg);
+    wire [9:0]pixel_y = (pixel_y_in >> scale_reg);
 
     wire [15:0]data0_out =  raddr0_buf < TILEMAP_START ? ram_data0_out :
                             raddr0_buf < FRAMEBUFFER_START ? tilemap_data0_out :
@@ -95,8 +98,8 @@ module mem(input clk,
 
         display_framebuffer_out <= frame_buffer[display_frame_addr[15:1]];
         display_odd_tile <= display_frame_addr[0];
-        display_pixel_x <= (pixel_x >> scale_reg);
-        display_pixel_y <= (pixel_y >> scale_reg);
+        display_pixel_x <= pixel_x;
+        display_pixel_y <= pixel_y;
         display_tilemap_out <= tile_map[pixel_idx];
 
         if (wen) begin
