@@ -9,7 +9,7 @@ module jpeb(
     output [3:0]vga_green,
     output [3:0]vga_blue,
     output uart_tx,
-    output status_led, output [11:0]leds
+    output [15:0]leds
 `endif
     );
 
@@ -30,8 +30,7 @@ module jpeb(
         clk_div_0 <= ~clk_div_0;
     end
 
-    wire [11:0] leds;
-    wire status_led;
+    wire [15:0] leds;
 
 `else
 
@@ -58,7 +57,8 @@ module jpeb(
     // PS/2
     wire ps2_ren;
     wire [15:0]ps2_data_out;
-    ps2 ps2(.ps2_clk(ps2_clk), .ps2_data(ps2_data), .clk(board_clk), .ren(ps2_ren), .data(ps2_data_out));
+    wire ps2_ready_flag;
+    ps2 ps2(.ps2_clk(ps2_clk), .ps2_data(ps2_data), .clk(clk), .ren(ps2_ren), .data(ps2_data_out), .ready(ps2_ready_flag));
 
     // VGA
     wire [9:0]pixel_addr_x;
@@ -83,7 +83,7 @@ module jpeb(
     wire tx_en = send_trig != tx_en_ff;
     reg [7:0]tx_data = 8'h65;
 
-    uart uart(.clk(clk), .baud_clk(board_clk), .tx_en(tx_en), .tx_data(tx_data), .tx(uart_tx));
+    uart uart(.clk(clk), .baud_clk(board_clk), .tx_en(ps2_ready_flag), .tx_data(ps2_data_out[7:0]), .tx(uart_tx));
 
     always @(posedge clk) begin
         tx_en_ff <= send_trig;
@@ -106,7 +106,7 @@ module jpeb(
         .wen(mem_write_en), .waddr(mem_write_addr), .wdata(mem_write_data),
         .ps2_ren(ps2_ren),
         .ps2_data_in(ps2_data_out),
-        .pixel_x(pixel_addr_x), .pixel_y(pixel_addr_y), .pixel(display_pixel)
+        .pixel_x_in(pixel_addr_x), .pixel_y_in(pixel_addr_y), .pixel(display_pixel)
         // .uart_tx(), .uart_tx_wen()
     );
 
@@ -116,9 +116,7 @@ module jpeb(
     // assign leds[7:0] = ret_val[7:0];
     // assign leds[7:0] = cpu_pc[7:0];
     // assign leds[11:8] = flags;
-    assign leds[7:0] = ps2_data_out[7:0];
-    reg [3:0]zero = 0;
-    assign leds[11:8] = zero;
+    assign leds = ps2_data_out;
 
     pipelined_cpu cpu(
         clk, mem_read_en,
@@ -130,7 +128,6 @@ module jpeb(
 
     // Blinks
     reg [24:0] led_counter = 0;
-    assign status_led = led_counter[24];
     assign send_trig = led_counter[24];
     always @(posedge clk) begin
         led_counter <= led_counter + 1;

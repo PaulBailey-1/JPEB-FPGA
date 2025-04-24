@@ -50,9 +50,6 @@ module mem(input clk,
     reg [15:0]framebuffer_data0_out;
     reg [15:0]framebuffer_data1_out;
 
-    wire [9:0]pixel_x = (pixel_x_in >> scale_reg);
-    wire [9:0]pixel_y = (pixel_y_in >> scale_reg);
-
     wire [15:0]data0_out =  raddr0_buf < TILEMAP_START ? ram_data0_out :
                             raddr0_buf < FRAMEBUFFER_START ? tilemap_data0_out :
                             raddr0_buf < IO_START ? framebuffer_data0_out :
@@ -70,9 +67,12 @@ module mem(input clk,
     reg [9:0]display_pixel_y;
     reg [15:0]display_tilemap_out;
 
-    reg [15:0]scale_reg;
+    reg [15:0]scale_reg = 0;
     reg [15:0]vscroll_reg;
     reg [15:0]hscroll_reg;
+
+    wire [9:0]pixel_x = (pixel_x_in >> scale_reg);
+    wire [9:0]pixel_y = (pixel_y_in >> scale_reg);
     
     // Display pixel retrevial
     wire [15:0] display_frame_addr = ({9'b0, pixel_x[9:3]} + {2'b0, pixel_y[9:3], 7'b0}); // (x / 8 + y /8 * 128)
@@ -88,9 +88,7 @@ module mem(input clk,
 
         ram_data0_out <= ram[raddr0];
         ram_data1_out <= ram[raddr1];
-        tilemap_data0_out <= tile_map[raddr0 - TILEMAP_START];
         tilemap_data1_out <= tile_map[raddr1 - TILEMAP_START];
-        framebuffer_data0_out <= frame_buffer[raddr0 - FRAMEBUFFER_START];
         framebuffer_data1_out <= frame_buffer[raddr1 - FRAMEBUFFER_START];
 
         rdata0 <= data0_out;
@@ -109,11 +107,14 @@ module mem(input clk,
                 tile_map[waddr - TILEMAP_START] <= wdata;
             end else if (waddr < IO_START) begin
                 frame_buffer[waddr - FRAMEBUFFER_START] <= wdata;
-            end else if (waddr == SCALE_REG) begin
+            end
+            if (waddr == SCALE_REG) begin
                 scale_reg <= wdata;
-            end else if (waddr == HSCROLL_REG) begin
+            end
+            if (waddr == HSCROLL_REG) begin
                 hscroll_reg <= wdata;
-            end else if (waddr == VSCROLL_REG) begin
+            end
+            if (waddr == VSCROLL_REG) begin
                 vscroll_reg <= wdata;
             end
         end
