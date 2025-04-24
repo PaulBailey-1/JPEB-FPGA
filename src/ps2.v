@@ -32,7 +32,7 @@ module ps2(input ps2_clk, input ps2_data, input clk, input ren, output [15:0]dat
         .oflag(ready_flag)
     );
 
-    reg [15:0]keyboard_reg = 16'h0068;
+    reg [15:0]keyboard_reg = 0;
     assign data = keyboard_reg;
     wire [7:0]ascii = scan_decode[scan_code[7:0]];
 
