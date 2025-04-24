@@ -105,7 +105,7 @@ module jpeb(
         .wen(mem_write_en), .waddr(mem_write_addr), .wdata(mem_write_data),
         .ps2_ren(ps2_ren),
         .ps2_data_in(ps2_data_out),
-        .pixel_x(pixel_addr_x), .pixel_y(pixel_addr_y), .pixel(display_pixel)
+        .pixel_x_in(pixel_addr_x), .pixel_y_in(pixel_addr_y), .pixel(display_pixel)
         // .uart_tx(), .uart_tx_wen()
     );
 
