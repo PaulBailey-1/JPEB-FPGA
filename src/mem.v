@@ -59,11 +59,19 @@ module mem(input clk,
     wire [15:0]data0_out =  raddr0_buf < TILEMAP_START ? ram_data0_out :
                             raddr0_buf < FRAMEBUFFER_START ? tilemap_data0_out :
                             raddr0_buf < IO_START ? framebuffer_data0_out :
-                            ps2_data_in;
+                            raddr0_buf == SCALE_REG ? scale_reg :
+                            raddr0_buf == HSCROLL_REG ? hscroll_reg :
+                            raddr0_buf == VSCROLL_REG ? vscroll_reg :
+                            raddr0_buf == PS2_REG ? ps2_data_in :
+                            16'h0;
     wire [15:0]data1_out =  raddr1_buf < TILEMAP_START ? ram_data1_out :
                             raddr1_buf < FRAMEBUFFER_START ? tilemap_data1_out :
                             raddr1_buf < IO_START ? framebuffer_data1_out :
-                            ps2_data_in;
+                            raddr1_buf == SCALE_REG ? scale_reg :
+                            raddr1_buf == HSCROLL_REG ? hscroll_reg :
+                            raddr1_buf == VSCROLL_REG ? vscroll_reg :
+                            raddr1_buf == PS2_REG ? ps2_data_in :
+                            16'h0;
 
     assign ps2_ren = raddr1_buf == PS2_REG & ren_buf;
     assign uart_tx_wen = waddr_buf == UART_TX_REG & wen_buf;
@@ -78,8 +86,13 @@ module mem(input clk,
     reg [15:0]vscroll_reg;
     reg [15:0]hscroll_reg;
 
-    wire [9:0]pixel_x = (pixel_x_in >> scale_reg);
-    wire [9:0]pixel_y = (pixel_y_in >> scale_reg);
+    initial begin
+        vscroll_reg <= 0;
+        hscroll_reg <= 0;
+    end
+
+    wire [9:0]pixel_x = (pixel_x_in >> scale_reg) + hscroll_reg;
+    wire [9:0]pixel_y = (pixel_y_in >> scale_reg) + vscroll_reg;
     
     // Display pixel retrevial
     wire [15:0] display_frame_addr = ({9'b0, pixel_x[9:3]} + {2'b0, pixel_y[9:3], 7'b0}); // (x / 8 + y /8 * 128)
