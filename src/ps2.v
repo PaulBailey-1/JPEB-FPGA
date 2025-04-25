@@ -62,6 +62,18 @@ module PS2Receiver(
     reg [7:0]dataprev=0;
     reg [3:0]cnt=0;
     reg flag=0;
+
+    // // Testing
+    // reg [11:0]counter = 0;
+    // always @(posedge clk ) begin
+    //     counter <= counter + 1;
+    //     if (counter == 12'hfff) begin
+    //         keycode <= 16'h001C;
+    //         oflag <= 1;
+    //     end else begin
+    //         oflag <= 0;
+    //     end
+    // end
     
     debouncer #(
         .COUNT_MAX(19),
