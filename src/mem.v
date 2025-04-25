@@ -51,10 +51,14 @@ module mem(input clk,
 
     reg [15:0]ram_data0_out;
     reg [15:0]ram_data1_out;
-    reg [15:0]tilemap_data0_out;
+    reg [15:0]tilemap_data0_out = 0;
     reg [15:0]tilemap_data1_out;
-    reg [15:0]framebuffer_data0_out;
+    reg [15:0]framebuffer_data0_out = 0;
     reg [15:0]framebuffer_data1_out;
+
+    reg [15:0]scale_reg = 0;
+    reg [15:0]vscroll_reg = 0;
+    reg [15:0]hscroll_reg = 0;
 
     wire [15:0]data0_out =  raddr0_buf < TILEMAP_START ? ram_data0_out :
                             raddr0_buf < FRAMEBUFFER_START ? tilemap_data0_out :
@@ -82,20 +86,11 @@ module mem(input clk,
     reg [9:0]display_pixel_y;
     reg [15:0]display_tilemap_out;
 
-    reg [15:0]scale_reg = 0;
-    reg [15:0]vscroll_reg;
-    reg [15:0]hscroll_reg;
-
-    initial begin
-        vscroll_reg <= 0;
-        hscroll_reg <= 0;
-    end
-
-    wire [9:0]pixel_x = (pixel_x_in >> scale_reg) + hscroll_reg;
-    wire [9:0]pixel_y = (pixel_y_in >> scale_reg) + vscroll_reg;
+    wire [9:0]pixel_x = (pixel_x_in >> scale_reg) + hscroll_reg[9:0];
+    wire [9:0]pixel_y = (pixel_y_in >> scale_reg) + vscroll_reg[9:0];
     
     // Display pixel retrevial
-    wire [15:0] display_frame_addr = ({9'b0, pixel_x[9:3]} + {2'b0, pixel_y[9:3], 7'b0}); // (x / 8 + y /8 * 128)
+    wire [15:0] display_frame_addr = ({9'b0, pixel_x[9:3]} + {2'b0, pixel_y[9:3], 7'b0}); // (x / 8 + y / 8 * 128)
     wire [15:0] display_tile_addr_pair = display_framebuffer_out;
     wire [7:0] display_tile = ~display_odd_tile ? display_tile_addr_pair[7:0] : display_tile_addr_pair[15:8];
     wire [15:0] pixel_idx = {2'b0, display_tile, 6'b0} + {10'b0, display_pixel_y[2:0], 3'b0} + {13'b0, display_pixel_x[2:0]}; // tile_idx * 64 + py % 8 * 8 + px % 8
