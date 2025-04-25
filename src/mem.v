@@ -86,8 +86,8 @@ module mem(input clk,
     reg [9:0]display_pixel_y;
     reg [15:0]display_tilemap_out;
 
-    wire [9:0]pixel_x = (pixel_x_in >> scale_reg) + hscroll_reg[9:0];
-    wire [9:0]pixel_y = (pixel_y_in >> scale_reg) + vscroll_reg[9:0];
+    wire [9:0]pixel_x = (pixel_x_in >> scale_reg) - hscroll_reg[9:0];
+    wire [9:0]pixel_y = (pixel_y_in >> scale_reg) - vscroll_reg[9:0];
     
     // Display pixel retrevial
     wire [15:0] display_frame_addr = ({9'b0, pixel_x[9:3]} + {2'b0, pixel_y[9:3], 7'b0}); // (x / 8 + y / 8 * 128)
