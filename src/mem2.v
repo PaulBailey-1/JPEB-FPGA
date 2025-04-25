@@ -106,8 +106,8 @@ module mem2(input clk,
     reg [15:0]vscroll_reg;
     reg [15:0]hscroll_reg;
 
-    wire [9:0]pixel_x = (pixel_x_in >> scale_reg) + hscroll_reg;
-    wire [9:0]pixel_y = (pixel_y_in >> scale_reg) + vscroll_reg;
+    wire [9:0]pixel_x = (pixel_x_in >> scale_reg) - hscroll_reg;
+    wire [9:0]pixel_y = (pixel_y_in >> scale_reg) - vscroll_reg;
 
     wire [15:0]data0_out =  raddr0_buf < RAM_2_START ? ram_data0_out :
                             raddr0_buf < SPRITE_0_START ? ram2_data0_out :
