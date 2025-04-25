@@ -1,1 +1,1 @@
-rsync -az /mnt/c/Users/paulr/Documents/FPGA/JPEB-FPGA ..
+rsync -az /mnt/c/Users/paulr/Documents/FPGA/JPEB-FPGA/jpeb-basys/jpeb-basys.tcl ./jpeb-basys/jpeb-basys.tcl
