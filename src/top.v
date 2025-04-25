@@ -9,6 +9,7 @@ module jpeb(
     output [3:0]vga_green,
     output [3:0]vga_blue,
     output uart_tx,
+    input uart_rx,
     output [15:0]leds
 `endif
     );
@@ -79,9 +80,15 @@ module jpeb(
 
     // UART
     wire uart_tx_en;
+    wire uart_rx_en;
     wire [7:0]uart_tx_data;
+    wire [7:0]uart_rx_data;
 
-    uart uart(.clk(clk), .baud_clk(board_clk), .tx_en(uart_tx_en), .tx_data(uart_tx_data), .tx(uart_tx));
+    uart uart(
+        .clk(clk), .baud_clk(board_clk), 
+        .tx_en(uart_tx_en), .tx_data(uart_tx_data), .tx(uart_tx),
+        .rx(uart_rx), .rx_en(uart_rx_en), .rx_data(uart_rx_data)
+    );
 
     // Memory
     wire [15:0]mem_read0_addr;
@@ -100,7 +107,8 @@ module jpeb(
         .ps2_ren(ps2_ren),
         .ps2_data_in(ps2_data_out),
         .pixel_x_in(pixel_addr_x), .pixel_y_in(pixel_addr_y), .pixel(display_pixel),
-        .uart_tx_data(uart_tx_data), .uart_tx_wen(uart_tx_en)
+        .uart_tx_data(uart_tx_data), .uart_tx_wen(uart_tx_en),
+        .uart_rx_data(uart_rx_data), .uart_rx_ren(uart_rx_en)
     );
 
     wire [15:0]ret_val;

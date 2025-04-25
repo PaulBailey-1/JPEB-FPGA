@@ -6,7 +6,8 @@ module mem(input clk,
     input wen, input [15:0]waddr, input [15:0]wdata,
     output ps2_ren, input [15:0]ps2_data_in,
     input [9:0]pixel_x_in, input [9:0]pixel_y_in, output [11:0]pixel,
-    output reg [7:0]uart_tx_data, output uart_tx_wen
+    output reg [7:0]uart_tx_data, output uart_tx_wen,
+    input [7:0]uart_rx_data, output uart_rx_ren
 );
 
     localparam TILEMAP_START = 16'hc000;
@@ -17,6 +18,7 @@ module mem(input clk,
     localparam HSCROLL_REG = 16'hfffd;
     localparam SCALE_REG = 16'hfffc;
     localparam UART_TX_REG = 16'hf000;
+    localparam UART_RX_REG = 16'hf001;
 
     (* ram_style = "block" *) reg [15:0]ram[0:16'hbfff]; // 768Kb (0x0000-0xBFFF)
     (* ram_style = "block" *) reg [15:0]tile_map[0:16'h1fff]; // 128Kb (0xC000-0xDFFF)
@@ -67,6 +69,7 @@ module mem(input clk,
                             raddr0_buf == HSCROLL_REG ? hscroll_reg :
                             raddr0_buf == VSCROLL_REG ? vscroll_reg :
                             raddr0_buf == PS2_REG ? ps2_data_in :
+                            raddr0_buf == UART_RX_REG ? {8'h00, uart_rx_data} :
                             16'h0;
     wire [15:0]data1_out =  raddr1_buf < TILEMAP_START ? ram_data1_out :
                             raddr1_buf < FRAMEBUFFER_START ? tilemap_data1_out :
@@ -75,10 +78,12 @@ module mem(input clk,
                             raddr1_buf == HSCROLL_REG ? hscroll_reg :
                             raddr1_buf == VSCROLL_REG ? vscroll_reg :
                             raddr1_buf == PS2_REG ? ps2_data_in :
+                            raddr1_buf == UART_RX_REG ? {8'h00, uart_rx_data} :
                             16'h0;
 
     assign ps2_ren = raddr1_buf == PS2_REG & ren_buf;
     assign uart_tx_wen = waddr_buf == UART_TX_REG & wen_buf;
+    assign uart_rx_ren = raddr1_buf == UART_RX_REG & ren_buf;
 
     reg [15:0]display_framebuffer_out;
     reg display_odd_tile;

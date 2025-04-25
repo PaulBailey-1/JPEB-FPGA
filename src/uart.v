@@ -2,8 +2,8 @@
 
 module uart(
     input clk, input baud_clk,
-    input tx_en, input [7:0]tx_data,
-    output tx
+    input tx_en, input [7:0]tx_data, output tx,
+    input rx, input rx_en, output [7:0]rx_data
 );
 
     wire [7:0]tx_buf_count;
@@ -27,6 +27,17 @@ module uart(
         tx_start <= tx_send;
     end
 
+    wire [7:0]rx_bus;
+    wire [7:0]rx_buf_count;
+
+    uart_rx uart_rx(.clk(baud_clk), .rx(rx), .rbus(rx_bus), .ready(rx_ready));
+
+    fifo rx_buf(
+        .clk(clk), .wen(rx_ready), .wdata(rx_data),
+        .ren(rx_en), .rdata(rx_data),
+        .size(rx_buf_count)
+    );
+
 endmodule
 
 module fifo(
@@ -47,10 +58,12 @@ module fifo(
             write_ptr <= write_ptr + 1;
             count <= count + 1;
         end
-        if (ren) begin
+        if (ren & count != 0) begin
             rdata <= data[read_ptr];
             read_ptr <= read_ptr + 1;
             count <= count - 1;
+        end else begin
+            rdata <= 0;
         end
     end
 
@@ -66,8 +79,8 @@ module uart_tx(
     output tx,
     output ready 
 );
-    parameter CD_MAX=10416, CD_WIDTH=16;
-    reg [CD_WIDTH-1:0] cd_count=0;
+    parameter CD_MAX=10416;
+    reg [15:0] cd_count=0;
     reg [3:0] count=0;
     reg running=0;
     reg [10:0] shift=11'h7ff;
@@ -92,3 +105,41 @@ module uart_tx(
     assign tx = (running == 1'b1) ? shift[0] : 1'b1;
     assign ready = ((running == 1'b0 && start == 1'b0) || (cd_count == CD_MAX && count == 4'd10)) ? 1'b1 : 1'b0;
 endmodule
+
+module uart_rx(
+    input clk,
+    input rx,
+    output reg [7:0]rbus,
+    output ready
+);
+    localparam COUNTER_PERIOD = 10416;
+
+    reg running = 0;
+    reg [7:0]shift = 0;
+    reg [15:0]counter = 0;
+    reg [3:0]bit_num = 0;
+
+    assign ready = bit_num == 8;
+
+    always@(posedge clk) begin
+        if (!running & !rx) begin
+            running <= 1;
+            counter <= COUNTER_PERIOD / 2;
+            bit_num <= 0;
+        end else if (running) begin
+            if (counter == COUNTER_PERIOD) begin
+                counter <= 0;
+                if (bit_num < 8) begin
+                    shift <= {rx, shift[7:1]};
+                    bit_num <= bit_num + 1;
+                end else begin
+                    running <= 0;
+                    rbus <= shift;
+                end
+            end
+        end else begin
+            counter <= counter + 1;
+        end
+    end
+endmodule
+
