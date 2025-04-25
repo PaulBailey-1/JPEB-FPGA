@@ -77,7 +77,7 @@ proc checkRequiredFiles { origin_dir} {
  "[file normalize "$origin_dir/../src/top.v"]"\
  "[file normalize "$origin_dir/../src/clock.v"]"\
  "[file normalize "$origin_dir/../src/pipeline_cpu/counter.v"]"\
- "[file normalize "$origin_dir/../../../../Desktop/WSL/JPEB-FPGA/jpeb-basys/jpeb-basys.srcs/utils_1/imports/synth_1/main.dcp"]"\
+ "[file normalize "$origin_dir/../../../../jpeb-basys/jpeb-basys.srcs/utils_1/imports/synth_1/main.dcp"]"\
   ]
   foreach ifile $files {
     if { ![file isfile $ifile] } {
@@ -643,12 +643,12 @@ set_property -name "xsim.simulate.xsim.more_options" -value "" -objects $obj
 # Set 'utils_1' fileset object
 set obj [get_filesets utils_1]
 set files [list \
- [file normalize "${origin_dir}/../../../../Desktop/WSL/JPEB-FPGA/jpeb-basys/jpeb-basys.srcs/utils_1/imports/synth_1/main.dcp"] \
+ [file normalize "${origin_dir}/../../../../jpeb-basys/jpeb-basys.srcs/utils_1/imports/synth_1/main.dcp"] \
 ]
 add_files -norecurse -fileset $obj $files
 
 # Set 'utils_1' fileset file properties for remote files
-set file "$origin_dir/../../../../Desktop/WSL/JPEB-FPGA/jpeb-basys/jpeb-basys.srcs/utils_1/imports/synth_1/main.dcp"
+set file "$origin_dir/../../../../jpeb-basys/jpeb-basys.srcs/utils_1/imports/synth_1/main.dcp"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets utils_1] [list "*$file"]]
 set_property -name "is_enabled" -value "1" -objects $file_obj
@@ -711,7 +711,7 @@ set_property -name "flow" -value "Vivado Synthesis 2024" -objects $obj
 set_property -name "name" -value "synth_1" -objects $obj
 set_property -name "needs_refresh" -value "0" -objects $obj
 set_property -name "srcset" -value "sources_1" -objects $obj
-set_property -name "incremental_checkpoint" -value "C:/Users/paulr/Desktop/WSL/JPEB-FPGA/${_xil_proj_name_}/${_xil_proj_name_}.srcs/utils_1/imports/synth_1/main.dcp" -objects $obj
+set_property -name "incremental_checkpoint" -value "C:/Users/brook/jpeb-basys/${_xil_proj_name_}/${_xil_proj_name_}.srcs/utils_1/imports/synth_1/main.dcp" -objects $obj
 set_property -name "auto_incremental_checkpoint" -value "1" -objects $obj
 set_property -name "gen_reports_parallel" -value "1" -objects $obj
 set_property -name "rqs_files" -value "" -objects $obj

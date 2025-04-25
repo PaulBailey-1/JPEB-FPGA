@@ -11,7 +11,7 @@ module counter(input isHalt, input clk, input [15:0]ret_val);
             $finish;
         end
         if (count == 500000) begin
-            $display("ran for 50000 cycles");
+            $display("ran for 500000 cycles");
             $finish;
         end
         count <= count + 1;
