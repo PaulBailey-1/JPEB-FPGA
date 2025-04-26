@@ -17,6 +17,7 @@ module writeback(input clk, input halt, input bubble_in,
     end
   end
 
+  // sw and branches don't write to register file, everything else does
   assign we = (tgt_in != 0) && (opcode_in != 3'b100 && opcode_in != 3'b110) && !bubble_in;
   assign result_out = (opcode_in == 3'b101) ? mem_result : alu_result;
 
