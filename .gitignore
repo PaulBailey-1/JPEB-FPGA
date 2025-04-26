@@ -7,5 +7,5 @@ Assembler.py
 *.gtkw
 data/program.hex
 *.sh
-
+*.mem
 obj_dir/*

@@ -107,8 +107,8 @@ module jpeb(
         .ps2_ren(ps2_ren),
         .ps2_data_in(ps2_data_out),
         .pixel_x_in(pixel_addr_x), .pixel_y_in(pixel_addr_y), .pixel(display_pixel),
-        .uart_tx_data(uart_tx_data), .uart_tx_wen(uart_tx_en),
-        .uart_rx_data(uart_rx_data), .uart_rx_ren(uart_rx_en)
+        .uart_tx_data(uart_tx_data), .uart_tx_wen(uart_tx_en)
+        //.uart_rx_data(uart_rx_data), .uart_rx_ren(uart_rx_en)
     );
 
     wire [15:0]ret_val;
